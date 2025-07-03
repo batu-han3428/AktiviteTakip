@@ -1,0 +1,6 @@
+@AktiviteTakip.Server_HostAddress = http://localhost:5298
+
+GET {{AktiviteTakip.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
