@@ -15,10 +15,8 @@ namespace AktiviteTakip.Server.Services
         public Guid? GetUserId()
         {
             var userIdString = _httpContextAccessor.HttpContext?.User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
-    ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
-    ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
-
-
+            ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
 
             if (Guid.TryParse(userIdString, out var userId))
             {
@@ -27,6 +25,5 @@ namespace AktiviteTakip.Server.Services
 
             return null;
         }
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using AktiviteTakip.Server.Common;
-using AktiviteTakip.Server.DTOs;
+﻿using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

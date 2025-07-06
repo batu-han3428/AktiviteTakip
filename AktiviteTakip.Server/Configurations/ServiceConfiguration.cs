@@ -17,7 +17,7 @@ namespace AktiviteTakip.Server.Configurations
             services.AddScoped<IEnumService, EnumService>();
             services.AddScoped<IEventService, EventService>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddScoped<IUnitOfWork, AktiviteTakip.Server.UnitOfWork.Concrete.UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
         }
     }
 }

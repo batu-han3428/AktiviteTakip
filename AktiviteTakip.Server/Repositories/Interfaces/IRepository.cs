@@ -9,9 +9,7 @@ namespace AktiviteTakip.Server.Repositories.Interfaces
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(Guid id);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-
         Task SoftDeleteAsync(T entity);
-
         void Update(T entity);
         void Remove(T entity);
     }

@@ -3,7 +3,6 @@ using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Reflection.Emit;
 
 namespace AktiviteTakip.Server.Data
 {

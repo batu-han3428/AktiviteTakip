@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace AktiviteTakip.Server.Entities
+﻿namespace AktiviteTakip.Server.Entities
 {
     public class Category: BaseEntity
     {

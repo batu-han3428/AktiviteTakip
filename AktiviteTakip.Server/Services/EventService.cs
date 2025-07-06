@@ -1,7 +1,6 @@
 ﻿using AktiviteTakip.Server.Common;
 using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Entities;
-using AktiviteTakip.Server.Enums;
 using AktiviteTakip.Server.Services.Interfaces;
 using AktiviteTakip.Server.UnitOfWork.Interfaces;
 using Microsoft.Extensions.Caching.Memory;

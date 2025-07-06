@@ -1,6 +1,5 @@
 ﻿using AktiviteTakip.Server.Data;
 using AktiviteTakip.Server.Entities;
-using AktiviteTakip.Server.Repositories;
 using AktiviteTakip.Server.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
