@@ -6,26 +6,44 @@ using AktiviteTakip.Server.UnitOfWork.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace AktiviteTakip.Server.UnitOfWork
+namespace AktiviteTakip.Server.UnitOfWork.Concrete
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
         private Dictionary<Type, object> _repositories = new();
         private IDbContextTransaction? _transaction;
 
+
+        private IFirmRepository? _firmRepository;
+        private IProjectRepository? _projectRepository;
+        private ICategoryRepository? _categoryRepository;
+        private IEventRepository? _eventRepository;
+
         public UnitOfWork(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
         }
+
+        public IFirmRepository Firms =>
+            _firmRepository ??= new FirmRepository(_context);
+
+        public IProjectRepository Projects =>
+            _projectRepository ??= new ProjectRepository(_context);
+
+        public ICategoryRepository Categories =>
+            _categoryRepository ??= new CategoryRepository(_context);
+
+        public IEventRepository Events =>
+            _eventRepository ??= new EventRepository(_context);
 
         public IRepository<T> Repository<T>() where T : BaseEntity
         {
@@ -38,7 +56,7 @@ namespace AktiviteTakip.Server.UnitOfWork
         }
 
         public UserManager<ApplicationUser> UserManager => _userManager;
-        public RoleManager<IdentityRole> RoleManager => _roleManager;
+        public RoleManager<ApplicationRole> RoleManager => _roleManager;
 
         public async Task BeginTransactionAsync()
         {

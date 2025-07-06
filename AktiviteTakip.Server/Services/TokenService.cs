@@ -21,6 +21,12 @@ namespace AktiviteTakip.Server.Services
 
         public async Task<string> GenerateToken(ApplicationUser user)
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (user.Id == Guid.Empty)
+                throw new ArgumentException("User Id boş olamaz");
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -35,9 +41,13 @@ namespace AktiviteTakip.Server.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var keyString = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(keyString))
+                throw new Exception("JWT key appsettings.json içinde tanımlı değil!");
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(60);
+            var expires = DateTime.UtcNow.AddMinutes(60);
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -48,5 +58,6 @@ namespace AktiviteTakip.Server.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

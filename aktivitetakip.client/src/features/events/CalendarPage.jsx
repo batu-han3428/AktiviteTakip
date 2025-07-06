@@ -4,19 +4,22 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import allLocales from '@fullcalendar/core/locales-all';
-import { Modal, Box, Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl, FormControlLabel, Switch, Chip, Input } from '@mui/material';
-//import { useAuth } from './AuthContext';
-//import { useEvents } from './EventsContext';
+import {
+    Button, FormControl, InputLabel, Select, MenuItem, Input, Chip, FormControlLabel, Switch
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-//import { useUsers } from './UsersContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUsers } from '../users/usersSlice';
+import { fetchEvents, saveEvent } from '../events/eventsSlice';
+import EventModal from './EventModal';
 
 const CalendarPage = () => {
-    //const { user } = useAuth();
-    const user = {};
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    //const { events, setEvents } = useEvents();
-    //const { users, setUsers } = useUsers();
-    //const [events, setEvents] = useState(null);
+
+    const user = useSelector(state => state.auth.user);
+    const users = useSelector(state => state.users?.list || []);
+    const events = useSelector(state => state.events.events);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [currentDate, setCurrentDate] = useState(null);
@@ -26,18 +29,17 @@ const CalendarPage = () => {
     const [isMonthlyView, setIsMonthlyView] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
 
+    useEffect(() => {
+        dispatch(fetchUsers());
+        dispatch(fetchEvents());
+    }, [dispatch]);
+
+    // Kaydetme / Güncelleme iþlemi için dispatch
     const addOrUpdateEvent = (eventData, isEditMode) => {
-        if (isEditMode) {
-            //setEvents(prev =>
-            //    prev.map((event) =>
-            //        event.id === eventData.id ? { ...event, ...eventData } : event
-            //    )
-            //);
-        } else {
-            //setEvents(prev => [...prev, { ...eventData, username: user.username }]);
-        }
+        dispatch(saveEvent({ eventData, isEditMode }));
     };
 
+    // Takvimde tarih týklanýnca modal açýlýr, yeni etkinlik eklemek için
     const handleDateClick = (arg) => {
         setCurrentDate(arg.dateStr);
         setSelectedEvent(null);
@@ -45,9 +47,16 @@ const CalendarPage = () => {
         setModalOpen(true);
     };
 
+    // Takvimde var olan etkinlik týklanýnca modal açýlýr, düzenlemek için
     const handleEventClick = (arg) => {
         setCurrentDate(arg.event.startStr);
-        setSelectedEvent(arg.event);
+        setSelectedEvent({
+            id: arg.event.id,
+            title: arg.event.title,
+            start: arg.event.start,
+            end: arg.event.end,
+            extendedProps: arg.event.extendedProps,
+        });
         setIsEditing(true);
         setModalOpen(true);
     };
@@ -62,20 +71,24 @@ const CalendarPage = () => {
         setSelectedUsers(event.target.value);
     };
 
-    const filteredEvents = null;
-    //    events.filter(event => {
-    //    if (user.role === 'admin') {
-    //        return selectedUsers.length === 0 || selectedUsers.includes(event.username);
-    //    }
-    //    return event.username === user.username;
-    //});
+    // Admin deðilse sadece kendi etkinlikleri gösterilir,
+    // admin ise seçilen kullanýcýlarýn etkinlikleri veya tüm etkinlikler gösterilir
+    const filteredEvents = user?.role === 'admin'
+        ? (selectedUsers.length === 0
+            ? events
+            : events.filter(event => selectedUsers.includes(event.username)))
+        : events.filter(event => event.username === user?.username);
 
     return (
         <div>
-            {user.role === 'admin' && (
+            {user?.role === 'admin' && (
                 <>
-                    <Button onClick={() => navigate('/reportpage')}>Raporlar</Button>
-                    <Button onClick={() => navigate('/rolespage')}>Rol</Button>
+                    <Button onClick={() => navigate('/reportpage')} sx={{ mr: 1 }}>
+                        Raporlar
+                    </Button>
+                    <Button onClick={() => navigate('/rolespage')} sx={{ mr: 1 }}>
+                        Rol
+                    </Button>
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Bir veya Daha Fazla Kullanýcý Seç</InputLabel>
                         <Select
@@ -96,11 +109,11 @@ const CalendarPage = () => {
                                 },
                             }}
                         >
-                            {/*{users.map((user) => (*/}
-                            {/*    <MenuItem key={user.username} value={user.username}>*/}
-                            {/*        {user.username}*/}
-                            {/*    </MenuItem>*/}
-                            {/*))}*/}
+                            {users.map((u) => (
+                                <MenuItem key={u.username} value={u.username}>
+                                    {u.username}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                 </>
@@ -109,8 +122,9 @@ const CalendarPage = () => {
                 control={<Switch checked={isMonthlyView} onChange={handleSwitchChange} />}
                 label={isMonthlyView ? "Aylýk Görünüm" : "Haftalýk Görünüm"}
             />
+
             <FullCalendar
-                key={currentView}
+                key={currentView} // görünüm deðiþtiðinde yeniden render için
                 plugins={[timeGridPlugin, interactionPlugin, dayGridPlugin]}
                 initialView={currentView}
                 weekends={false}
@@ -120,20 +134,13 @@ const CalendarPage = () => {
                 eventClick={handleEventClick}
                 events={filteredEvents}
                 eventResizableFromStart={true}
-                eventTimeFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                }}
-                slotLabelFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }}
+                eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
                 timeZone="UTC"
                 locales={allLocales}
                 locale="tr"
             />
+
             <EventModal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
@@ -142,197 +149,12 @@ const CalendarPage = () => {
                 selectedEvent={selectedEvent}
                 isEditing={isEditing}
                 user={user}
-                //users={users}
-                isAdmin={user.role === 'admin'}
+                users={users}
+                isAdmin={user?.role === 'admin'}
             />
         </div>
     );
 };
 
-const EventModal = ({ isOpen, onClose, onSave, currentDate, selectedEvent, isEditing, user, users, isAdmin }) => {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
-    const [firma, setFirma] = useState('');
-    const [proje, setProje] = useState('');
-    const [note, setNote] = useState('');
-    const [location, setLocation] = useState('');
-    const [startTime, setStartTime] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [selectedUsername, setSelectedUsername] = useState(user.username);
-    const firmalar = ['Firma A', 'Firma B', 'Firma C'];
-    const projelerMap = {
-        'Firma A': ['Proje 1', 'Proje 2'],
-        'Firma B': ['Proje B1'],
-        'Firma C': []
-    };
-
-    useEffect(() => {
-        if (selectedEvent) {
-            setTitle(selectedEvent.title || '');
-            setDescription(selectedEvent.extendedProps?.description || '');
-            setCategory(selectedEvent.extendedProps?.category || '');
-            setFirma(selectedEvent.extendedProps?.firma || '');
-            setProje(selectedEvent.extendedProps?.proje || '');
-            setNote(selectedEvent.extendedProps?.note || '');
-            setLocation(selectedEvent.extendedProps?.location || '');
-            const startDate = new Date(selectedEvent.start);
-            const endDate = new Date(selectedEvent.end);
-            setStartTime(startDate.toISOString().substring(11, 16));
-            setEndTime(endDate.toISOString().substring(11, 16));
-            setSelectedUsername(selectedEvent.extendedProps?.username || user.username);
-        } else {
-            setTitle('');
-            setDescription('');
-            setCategory('');
-            setFirma('');
-            setProje('');
-            setNote('');
-            setLocation('');
-            setStartTime('');
-            setEndTime('');
-            setSelectedUsername(user.username);
-        }
-    }, [selectedEvent]);
-
-    const handleSave = () => {
-        if (!title || !description || !category || !startTime || !endTime) {
-            alert('Lütfen tüm gerekli alanlarý doldurun.');
-            return;
-        }
-
-        const currentDateOnly = currentDate.split('T')[0];
-        const start = new Date(`${currentDateOnly}T${startTime}:00`);
-        const end = new Date(`${currentDateOnly}T${endTime}:00`);
-
-        if (isNaN(start) || isNaN(end)) {
-            alert('Geçersiz tarih veya saat!');
-            return;
-        }
-
-        const eventData = {
-            id: selectedEvent ? selectedEvent.id : Date.now().toString(),
-            title,
-            start: new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString(),
-            end: new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString(),
-            description,
-            category,
-            firma,
-            proje,
-            note,
-            location,
-            username: selectedUsername
-        };
-
-        onSave(eventData, isEditing);
-        onClose();
-    };
-
-    useEffect(() => {
-        if (!isOpen) {
-            setTitle('');
-            setDescription('');
-            setCategory('');
-            setFirma('');
-            setProje('');
-            setNote('');
-            setLocation('');
-            setStartTime('');
-            setEndTime('');
-            setSelectedUsername(user.username);
-        }
-    }, [isOpen, user.username]);
-
-
-    return (
-        <Modal open={isOpen} onClose={onClose}>
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    bgcolor: 'background.paper',
-                    borderRadius: 2,
-                    boxShadow: 24,
-                    p: 4,
-                    outline: 'none',
-                    width: '90vw',
-                    maxWidth: 800,
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                }}
-            >
-                <Typography variant="h6" gutterBottom>
-                    {isEditing ? 'Etkinlik Düzenle' : 'Yeni Etkinlik Ekle'}
-                </Typography>
-
-                {isAdmin && (
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Kullanýcý Seç</InputLabel>
-                        <Select value={selectedUsername} onChange={(e) => setSelectedUsername(e.target.value)}>
-                            {users.map((u) => (
-                                <MenuItem key={u.username} value={u.username}>
-                                    {u.username}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                )}
-
-                <TextField label="Baþlýk" fullWidth margin="normal" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <TextField label="Etkinlik Detayý" fullWidth multiline rows={4} margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Kategori</InputLabel>
-                    <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-                        <MenuItem value="Toplantý">Toplantý</MenuItem>
-                        <MenuItem value="Seminer">Seminer</MenuItem>
-                        <MenuItem value="Eðitim">Eðitim</MenuItem>
-                        <MenuItem value="Görev">Görev</MenuItem>
-                        <MenuItem value="Diðer">Diðer</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Firma</InputLabel>
-                    <Select value={firma} onChange={(e) => setFirma(e.target.value)}>
-                        {firmalar.map((f) => (
-                            <MenuItem key={f} value={f}>{f}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                {firma && projelerMap[firma]?.length > 0 && (
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Proje</InputLabel>
-                        <Select value={proje} onChange={(e) => setProje(e.target.value)}>
-                            {projelerMap[firma].map((p) => (
-                                <MenuItem key={p} value={p}>{p}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                )}
-                <TextField label="Not" fullWidth margin="normal" inputProps={{ maxLength: 50 }} value={note} onChange={(e) => setNote(e.target.value)} />
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Yer</InputLabel>
-                    <Select value={location} onChange={(e) => setLocation(e.target.value)}>
-                        <MenuItem value="Onsite">Onsite</MenuItem>
-                        <MenuItem value="Online">Online</MenuItem>
-                        <MenuItem value="Offline">Offline</MenuItem>
-                    </Select>
-                </FormControl>
-                <TextField label="Baþlangýç Saati" type="time" fullWidth margin="normal" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                <TextField label="Bitiþ Saati" type="time" fullWidth margin="normal" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-                <Box sx={{ mt: 2 }}>
-                    <Button variant="contained" color="primary" onClick={handleSave} sx={{ mr: 2 }}>
-                        {isEditing ? 'Güncelle' : 'Kaydet'}
-                    </Button>
-                    <Button variant="outlined" color="secondary" onClick={onClose}>
-                        Kapat
-                    </Button>
-                </Box>
-            </Box>
-        </Modal>
-    );
-};
-
-
 export default CalendarPage;
+

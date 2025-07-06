@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {jwtDecode} from 'jwt-decode';
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const loginUser = createAsyncThunk(
@@ -14,9 +13,14 @@ export const loginUser = createAsyncThunk(
             });
 
             const data = await res.json();
-
+            console.log(res)
+            console.log(data)
             if (!res.ok) {
                 return thunkAPI.rejectWithValue(data.message || 'Login failed');
+            }
+
+            if (!data.token || typeof data.token !== 'string' || data.token.trim() === '') {
+                return thunkAPI.rejectWithValue('Token is missing or invalid');
             }
 
             return data.token;
@@ -55,29 +59,33 @@ let user = null;
 let roles = [];
 let isLoggedIn = false;
 
+
 if (token) {
     try {
         const decoded = jwtDecode(token);
 
-        // Claims keyleri (backend'den gelen full isimli claim key'ler)
-        const nameIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
-        const nameClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name';
-        const emailClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
-        const roleClaim = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
-
-        user = decoded[nameClaim] || decoded[emailClaim] || decoded[nameIdClaim] || null;
-
-        // role claim tek mi dizi mi kontrol et
-        const rawRole = decoded[roleClaim];
-        if (Array.isArray(rawRole)) {
-            roles = rawRole;
-        } else if (typeof rawRole === 'string') {
-            roles = [rawRole];
+        // Token süresi kontrolü
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (decoded.exp && decoded.exp < currentTime) {
+            // Token süresi dolmuþ
+            localStorage.removeItem('token');
         } else {
-            roles = [];
-        }
+            const nameIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+            const nameClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name';
+            const emailClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+            const roleClaim = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
 
-        isLoggedIn = true;
+            user = decoded[nameClaim] || decoded[emailClaim] || decoded[nameIdClaim] || null;
+
+            const rawRole = decoded[roleClaim];
+            if (Array.isArray(rawRole)) {
+                roles = rawRole;
+            } else if (typeof rawRole === 'string') {
+                roles = [rawRole];
+            }
+
+            isLoggedIn = true;
+        }
     } catch {
         localStorage.removeItem('token');
     }
@@ -110,7 +118,7 @@ const authSlice = createSlice({
             state.roles = action.payload.roles || [];
             state.isLoggedIn = true;
             state.error = null;
-        }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -120,48 +128,69 @@ const authSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.token = action.payload;
 
-                const decoded = jwtDecode(action.payload);
+                const token = action.payload;
 
-                const nameIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
-                const nameClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name';
-                const emailClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
-                const roleClaim = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
-
-                const user = decoded[nameClaim] || decoded[emailClaim] || decoded[nameIdClaim] || null;
-
-                const rawRole = decoded[roleClaim];
-                let roles = [];
-                if (Array.isArray(rawRole)) {
-                    roles = rawRole;
-                } else if (typeof rawRole === 'string') {
-                    roles = [rawRole];
+                if (typeof token !== 'string' || token.trim() === '') {
+                    state.error = 'Invalid token received';
+                    state.token = null;
+                    state.user = null;
+                    state.roles = [];
+                    state.isLoggedIn = false;
+                    localStorage.removeItem('token');
+                    return;
                 }
 
-                state.roles = roles;
-                state.user = user;
-                state.isLoggedIn = true;
+                state.token = token;
 
-                localStorage.setItem('token', action.payload);
+                try {
+                    const decoded = jwtDecode(token);
+
+                    const nameIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+                    const nameClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name';
+                    const emailClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+                    const roleClaim = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+
+                    const user = decoded[nameClaim] || decoded[emailClaim] || decoded[nameIdClaim] || null;
+
+                    const rawRole = decoded[roleClaim];
+                    let roles = [];
+                    if (Array.isArray(rawRole)) {
+                        roles = rawRole;
+                    } else if (typeof rawRole === 'string') {
+                        roles = [rawRole];
+                    }
+
+                    state.roles = roles;
+                    state.user = user;
+                    state.isLoggedIn = true;
+
+                    localStorage.setItem('token', token);
+                } catch {
+                    state.error = 'Failed to decode token';
+                    state.token = null;
+                    state.user = null;
+                    state.roles = [];
+                    state.isLoggedIn = false;
+                    localStorage.removeItem('token');
+                }
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
-
             .addCase(registerUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(registerUser.fulfilled, (state /*, action */) => {
+            .addCase(registerUser.fulfilled, (state /* action */) => {
                 state.loading = false;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
-    }
+    },
 });
 
 export const { logout, setCredentials } = authSlice.actions;

@@ -1,12 +1,12 @@
 ﻿namespace AktiviteTakip.Server.Entities.Interfaces
 {
-    public interface IBaseEntity
+    public interface IBaseEntity<T>
     {
-        Guid Id { get; set; }
+        T Id { get; set; }
         DateTime CreatedAt { get; set; }
         DateTime? UpdatedAt { get; set; }
         bool IsActive { get; set; }
-        string CreatedBy { get; set; }
-        string? UpdatedBy { get; set; }
+        Guid CreatedBy { get; set; }
+        Guid? UpdatedBy { get; set; }
     }
 }

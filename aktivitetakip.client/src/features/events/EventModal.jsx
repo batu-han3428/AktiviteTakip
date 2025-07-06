@@ -1,16 +1,42 @@
-import { useState, useEffect } from 'react';
-import { Modal, Box, Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
-import { addOrUpdateEvent, closeModal } from './eventsSlice';
+import { useEffect, useState } from 'react';
+import {
+    Modal,
+    Box,
+    TextField,
+    Button,
+    Typography,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFirms } from '../firm/firmsSlice';
+import { fetchCategories } from '../categories/categoriesSlice';
 
-const EventModal = ({ isOpen, user, users }) => {
+const EventModal = ({
+    isOpen,
+    onClose,
+    onSave,
+    currentDate,
+    selectedEvent,
+    isEditing,
+    user,
+    users,
+    isAdmin,
+}) => {
     const dispatch = useDispatch();
-    const {
-        currentDate,
-        selectedEvent,
-        isEditing,
-    } = useSelector(state => state.events);  // Burada state.events olacak
 
+    const locations = useSelector((state) => state.enums.locations);
+
+    // Redux store'dan veriler
+    const firms = useSelector((state) => state.firm.list);
+    const firmLoading = useSelector((state) => state.firm.loading);
+
+    const categories = useSelector((state) => state.categories.list);
+    const categoriesLoading = useSelector((state) => state.categories.loading);
+
+    // Local state
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
@@ -20,20 +46,28 @@ const EventModal = ({ isOpen, user, users }) => {
     const [location, setLocation] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const [selectedUsername, setSelectedUsername] = useState(user.username);
 
-    const firmalar = ['Firma A', 'Firma B', 'Firma C'];
-    const projelerMap = {
-        'Firma A': ['Proje 1', 'Proje 2'],
-        'Firma B': ['Proje B1'],
-        'Firma C': []
-    };
+    const [selectedUsernames, setSelectedUsernames] = useState([user.username]);
 
+
+    // Modal açýlýnca firmalarý ve kategorileri fetch et
+    useEffect(() => {
+        if (isOpen) {
+            dispatch(fetchFirms());
+            dispatch(fetchCategories());
+        }
+    }, [isOpen, dispatch]);
+
+    // Seçilen firmaya göre projeler
+    const selectedFirm = firms.find((f) => f.id === firma);
+    const projectsForSelectedFirm = selectedFirm ? selectedFirm.projects || [] : [];
+
+    // selectedEvent varsa formu doldur
     useEffect(() => {
         if (selectedEvent) {
             setTitle(selectedEvent.title || '');
             setDescription(selectedEvent.extendedProps?.description || '');
-            setCategory(selectedEvent.extendedProps?.category || '');
+            setCategory(selectedEvent.extendedProps?.categoryId || '');
             setFirma(selectedEvent.extendedProps?.firma || '');
             setProje(selectedEvent.extendedProps?.proje || '');
             setNote(selectedEvent.extendedProps?.note || '');
@@ -42,9 +76,7 @@ const EventModal = ({ isOpen, user, users }) => {
             const endDate = new Date(selectedEvent.end);
             setStartTime(startDate.toISOString().substring(11, 16));
             setEndTime(endDate.toISOString().substring(11, 16));
-            setSelectedUsername(selectedEvent.extendedProps?.username || user.username);
         } else {
-            // Yeni etkinlik için alanlarý temizle
             setTitle('');
             setDescription('');
             setCategory('');
@@ -54,13 +86,12 @@ const EventModal = ({ isOpen, user, users }) => {
             setLocation('');
             setStartTime('');
             setEndTime('');
-            setSelectedUsername(user.username);
         }
-    }, [selectedEvent]);
+    }, [selectedEvent, user.username]);
 
+    // Modal kapandýðýnda formu sýfýrla
     useEffect(() => {
         if (!isOpen) {
-            // Modal kapanýnca alanlarý temizle
             setTitle('');
             setDescription('');
             setCategory('');
@@ -70,10 +101,10 @@ const EventModal = ({ isOpen, user, users }) => {
             setLocation('');
             setStartTime('');
             setEndTime('');
-            setSelectedUsername(user.username);
         }
     }, [isOpen, user.username]);
 
+    // Kaydet fonksiyonu
     const handleSave = () => {
         if (!title || !description || !category || !startTime || !endTime) {
             alert('Lütfen tüm gerekli alanlarý doldurun.');
@@ -90,28 +121,26 @@ const EventModal = ({ isOpen, user, users }) => {
         }
 
         const eventData = {
-            id: selectedEvent ? selectedEvent.id : Date.now().toString(),
+            ...(selectedEvent && { id: selectedEvent.id }),
             title,
-            start: new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString(),
-            end: new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString(),
-            extendedProps: {
-                description,
-                category,
-                firma,
-                proje,
-                note,
-                location,
-                username: selectedUsername,
-            },
-            username: selectedUsername,
+            startAt: new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString(),
+            endAt: new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString(),
+            description,
+            categoryId: category,
+            firmId: firma,
+            projectId: proje,
+            note,
+            locationId: location,
+            participants: selectedUsernames,
         };
 
-        dispatch(addOrUpdateEvent({ eventData, isEditMode: isEditing }));
-        dispatch(closeModal());
+
+        onSave(eventData, isEditing);
+        onClose();
     };
 
     return (
-        <Modal open={isOpen} onClose={() => dispatch(closeModal())}>
+        <Modal open={isOpen} onClose={onClose}>
             <Box
                 sx={{
                     position: 'absolute',
@@ -133,10 +162,15 @@ const EventModal = ({ isOpen, user, users }) => {
                     {isEditing ? 'Etkinlik Düzenle' : 'Yeni Etkinlik Ekle'}
                 </Typography>
 
-                {user.role === 'admin' && (
+                {isAdmin && (
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Kullanýcý Seç</InputLabel>
-                        <Select value={selectedUsername} onChange={(e) => setSelectedUsername(e.target.value)}>
+                        <Select
+                            multiple
+                            value={selectedUsernames}
+                            onChange={(e) => setSelectedUsernames(e.target.value)}
+                            renderValue={(selected) => selected.join(', ')}
+                        >
                             {users.map((u) => (
                                 <MenuItem key={u.username} value={u.username}>
                                     {u.username}
@@ -144,55 +178,121 @@ const EventModal = ({ isOpen, user, users }) => {
                             ))}
                         </Select>
                     </FormControl>
+
                 )}
 
-                <TextField label="Baþlýk" fullWidth margin="normal" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <TextField label="Etkinlik Detayý" fullWidth multiline rows={4} margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
-                <FormControl fullWidth margin="normal">
+                <TextField
+                    label="Baþlýk"
+                    fullWidth
+                    margin="normal"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+
+                <TextField
+                    label="Etkinlik Detayý"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                />
+
+                <FormControl fullWidth margin="normal" disabled={categoriesLoading}>
                     <InputLabel>Kategori</InputLabel>
-                    <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-                        <MenuItem value="Toplantý">Toplantý</MenuItem>
-                        <MenuItem value="Seminer">Seminer</MenuItem>
-                        <MenuItem value="Eðitim">Eðitim</MenuItem>
-                        <MenuItem value="Görev">Görev</MenuItem>
-                        <MenuItem value="Diðer">Diðer</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>Firma</InputLabel>
-                    <Select value={firma} onChange={(e) => setFirma(e.target.value)}>
-                        {firmalar.map((f) => (
-                            <MenuItem key={f} value={f}>{f}</MenuItem>
+                    <Select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                    >
+                        {categories.map((cat) => (
+                            <MenuItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                            </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
-                {firma && projelerMap[firma]?.length > 0 && (
-                    <FormControl fullWidth margin="normal">
+
+                <FormControl fullWidth margin="normal" disabled={firmLoading}>
+                    <InputLabel>Firma</InputLabel>
+                    <Select
+                        value={firma}
+                        onChange={(e) => setFirma(e.target.value)}
+                    >
+                        {firms.map((f) => (
+                            <MenuItem key={f.id} value={f.id}>
+                                {f.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                {firma && (
+                    <FormControl fullWidth margin="normal" disabled={firmLoading}>
                         <InputLabel>Proje</InputLabel>
-                        <Select value={proje} onChange={(e) => setProje(e.target.value)}>
-                            {projelerMap[firma].map((p) => (
-                                <MenuItem key={p} value={p}>{p}</MenuItem>
+                        <Select
+                            value={proje}
+                            onChange={(e) => setProje(e.target.value)}
+                        >
+                            {projectsForSelectedFirm.map((p) => (
+                                <MenuItem key={p.id} value={p.id}>
+                                    {p.name}
+                                </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
                 )}
-                <TextField label="Not" fullWidth margin="normal" inputProps={{ maxLength: 50 }} value={note} onChange={(e) => setNote(e.target.value)} />
+
+                <TextField
+                    label="Not"
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ maxLength: 50 }}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                />
+
                 <FormControl fullWidth margin="normal">
                     <InputLabel>Yer</InputLabel>
-                    <Select value={location} onChange={(e) => setLocation(e.target.value)}>
-                        <MenuItem value="Onsite">Onsite</MenuItem>
-                        <MenuItem value="Online">Online</MenuItem>
-                        <MenuItem value="Offline">Offline</MenuItem>
+                    <Select
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                    >
+                        {locations.map((loc) => (
+                            <MenuItem key={loc.id} value={loc.id}>
+                                {loc.label}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
-                <TextField label="Baþlangýç Saati" type="time" fullWidth margin="normal" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                <TextField label="Bitiþ Saati" type="time" fullWidth margin="normal" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-                <Box sx={{ mt: 2 }}>
-                    <Button variant="contained" color="primary" onClick={handleSave} sx={{ mr: 2 }}>
-                        {isEditing ? 'Güncelle' : 'Kaydet'}
+
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <TextField
+                        label="Baþlangýç Saati"
+                        type="time"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ step: 300 }}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Bitiþ Saati"
+                        type="time"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ step: 300 }}
+                        fullWidth
+                    />
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3, gap: 1 }}>
+                    <Button onClick={onClose} variant="outlined" color="error">
+                        Ýptal
                     </Button>
-                    <Button variant="outlined" color="secondary" onClick={() => dispatch(closeModal())}>
-                        Kapat
+                    <Button onClick={handleSave} variant="contained" color="primary">
+                        Kaydet
                     </Button>
                 </Box>
             </Box>

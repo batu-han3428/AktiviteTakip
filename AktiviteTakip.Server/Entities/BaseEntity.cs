@@ -2,13 +2,13 @@
 
 namespace AktiviteTakip.Server.Entities
 {
-    public abstract class BaseEntity : IBaseEntity
+    public abstract class BaseEntity : IBaseEntity<Guid>
     {
         public Guid Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public bool IsActive { get; set; } = true;
-        public string CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
+        public Guid CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }

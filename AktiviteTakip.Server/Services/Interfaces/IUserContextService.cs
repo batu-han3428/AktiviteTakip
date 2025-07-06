@@ -2,6 +2,6 @@
 {
     public interface IUserContextService
     {
-        string GetUserId();
+        Guid? GetUserId();
     }
 }

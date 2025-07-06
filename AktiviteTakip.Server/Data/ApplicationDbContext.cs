@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace AktiviteTakip.Server.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
         private readonly IUserContextService _userContextService;
 
@@ -18,6 +18,11 @@ namespace AktiviteTakip.Server.Data
         }
 
         public DbSet<Group> Groups { get; set; }
+        public DbSet<Project> Project { get; set; }
+        public DbSet<Firm> Firm { get; set; }
+        public DbSet<EventParticipant> EventParticipant { get; set; }
+        public DbSet<Event> Event { get; set; }
+        public DbSet<Category> Category { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -44,7 +49,7 @@ namespace AktiviteTakip.Server.Data
         {
             var entries = ChangeTracker.Entries<BaseEntity>();
 
-            var userId = _userContextService.GetUserId();
+            var userId = _userContextService.GetUserId() ?? Guid.Empty;
 
             foreach (var entry in entries)
             {

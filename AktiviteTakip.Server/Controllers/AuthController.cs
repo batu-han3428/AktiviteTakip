@@ -1,4 +1,5 @@
-﻿using AktiviteTakip.Server.DTOs;
+﻿using AktiviteTakip.Server.Common;
+using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,24 +18,29 @@ namespace AktiviteTakip.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
-            var token = await _authService.LoginAsync(request);
-            if (token == null)
-                return Unauthorized();
+            if (!ModelState.IsValid)
+                return BadRequest("Geçersiz veri.");
 
-            return Ok(new { Token = token });
+            var result = await _authService.LoginAsync(request);
+
+            if (!result.Success)
+                return Unauthorized(new { message = result.Message ?? "Authentication failed" });
+
+            return Ok(new { Token = result.Data, Message = result.Message });
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Geçersiz veri.");
+
             var result = await _authService.RegisterAsync(request);
+
             if (!result.Success)
-                return BadRequest(new { message = result.ErrorMessage ?? "Registration failed" });
+                return BadRequest(new { message = result.Message ?? "Registration failed" });
 
-            // Opsiyonel: register sonrası token oluşturma (login otomatik yapılabilir)
-            // var token = await _authService.GenerateJwtTokenAsync(user);
-
-            return Ok(new { message = "Registration successful" /*, token*/ });
+            return Ok(result);
         }
     }
 }

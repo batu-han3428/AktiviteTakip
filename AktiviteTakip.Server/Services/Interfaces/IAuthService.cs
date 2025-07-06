@@ -1,11 +1,11 @@
-﻿using AktiviteTakip.Server.DTOs;
-using AktiviteTakip.Server.Models;
+﻿using AktiviteTakip.Server.Common;
+using AktiviteTakip.Server.DTOs;
 
 namespace AktiviteTakip.Server.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<string?> LoginAsync(LoginRequestDto loginRequest);
-        Task<RegisterResult> RegisterAsync(RegisterRequestDto registerRequest);
+       Task<Result<bool>> RegisterAsync(RegisterRequestDto registerRequest);
+       Task<Result<string>> LoginAsync(LoginRequestDto loginRequest);
     }
 }

@@ -12,9 +12,21 @@ namespace AktiviteTakip.Server.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string GetUserId()
+        public Guid? GetUserId()
         {
-            return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdString = _httpContextAccessor.HttpContext?.User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+    ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+    ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
+
+
+
+            if (Guid.TryParse(userIdString, out var userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
+
     }
 }
