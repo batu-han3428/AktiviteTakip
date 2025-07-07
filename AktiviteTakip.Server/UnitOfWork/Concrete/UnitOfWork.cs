@@ -22,6 +22,8 @@ namespace AktiviteTakip.Server.UnitOfWork.Concrete
         private IProjectRepository? _projectRepository;
         private ICategoryRepository? _categoryRepository;
         private IEventRepository? _eventRepository;
+        private IUserRepository? _userRepository;
+        private IGroupRepository? _groupRepository;
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -44,6 +46,12 @@ namespace AktiviteTakip.Server.UnitOfWork.Concrete
 
         public IEventRepository Events =>
             _eventRepository ??= new EventRepository(_context);
+
+        public IUserRepository Users =>
+            _userRepository ??= new UserRepository(_context);
+
+        public IGroupRepository Groups =>
+            _groupRepository ??= new GroupRepository(_context);
 
         public IRepository<T> Repository<T>() where T : BaseEntity
         {

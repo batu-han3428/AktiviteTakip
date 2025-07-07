@@ -2,7 +2,7 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class GetEventDto
+    public sealed class GetEventDto
     {
         public Guid Id { get; set; }
         public string Title { get; set; }

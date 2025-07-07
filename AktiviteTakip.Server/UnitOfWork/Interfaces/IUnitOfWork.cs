@@ -15,5 +15,7 @@ namespace AktiviteTakip.Server.UnitOfWork.Interfaces
         IProjectRepository Projects { get; }
         ICategoryRepository Categories { get; }
         IEventRepository Events { get; }
+        IUserRepository Users { get; }
+        IGroupRepository Groups { get; }
     }
 }

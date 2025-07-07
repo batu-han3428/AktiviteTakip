@@ -2,7 +2,7 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class RegisterRequestDto
+    public sealed class RegisterRequestDto
     {
         [Required(ErrorMessage = "UserName zorunludur")]
         public string UserName { get; set; } = null!;

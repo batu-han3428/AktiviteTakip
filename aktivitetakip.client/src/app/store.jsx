@@ -6,6 +6,8 @@ import firmReducer from '../features/firm/firmsSlice';
 import projectReducer from '../features/project/projectSlice';
 import categoryReducer from '../features/categories/categoriesSlice';
 import enumReducer from '../features/enums/enumsSlice';
+import groupsReducer from "../features/admin/pages/groups/groupsSlice";
+import rolesReducer from "../features/admin/pages/roles/rolesSlice";
 
 const store = configureStore({
     reducer: {
@@ -16,6 +18,8 @@ const store = configureStore({
         project: projectReducer,
         categories: categoryReducer,
         enums: enumReducer,
+        groups: groupsReducer,
+        roles: rolesReducer,
     },
 });
 

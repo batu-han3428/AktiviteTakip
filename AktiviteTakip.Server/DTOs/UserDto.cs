@@ -1,6 +1,6 @@
 ﻿namespace AktiviteTakip.Server.DTOs
 {
-    public class UserDto
+    public sealed class UserDto
     {
         public Guid Id { get; set; }
         public string Username { get; set; }

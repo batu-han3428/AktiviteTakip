@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class CreateEventDto
+    public sealed class CreateEventDto
     {
         [Required(ErrorMessage = "Başlık zorunludur")]
         public string Title { get; set; }

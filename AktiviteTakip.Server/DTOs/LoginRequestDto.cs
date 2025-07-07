@@ -2,7 +2,7 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class LoginRequestDto
+    public sealed class LoginRequestDto
     {
         [Required(ErrorMessage = "Email zorunludur")]
         public string Email { get; set; } = null!;

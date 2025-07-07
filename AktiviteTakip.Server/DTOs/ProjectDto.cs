@@ -2,7 +2,7 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class ProjectDto
+    public sealed class ProjectDto
     {
         public Guid Id { get; set; }
 

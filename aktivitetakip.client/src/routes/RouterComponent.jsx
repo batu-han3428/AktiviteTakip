@@ -6,8 +6,8 @@ import RegisterPage from '../features/auth/RegisterPage';
 import ProtectedRoute from '../features/auth/ProtectedRoute';
 
 import AdminPanelLayout from '../features/admin/components/AdminPanelLayout';
-import UsersPage from '../features/admin/pages/UsersPage';
-import GroupsPage from '../features/admin/pages/GroupsPage';
+import UsersPage from '../features/admin/pages/users/UsersPage';
+import GroupsPage from '../features/admin/pages/groups/GroupsPage';
 import Layout from '../features/common/components/Layout';
 import LogoutPage from '../features/auth/LogoutPage';
 

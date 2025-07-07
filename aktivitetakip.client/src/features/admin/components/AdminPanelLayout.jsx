@@ -47,11 +47,11 @@ const AdminPanelLayout = () => {
     // Menü elemanlarý - yol ve isimler
     const menuItems = [
         {
-            title: 'Tanýmlar',
+            title: 'Tanimlar',
             icon: <ListItemIcon><Category /></ListItemIcon>,
             children: [
-                { title: 'Kullanýcý Tanýmlarý', to: '/admin/users' },
-                { title: 'Grup Tanýmlarý', to: '/admin/groups' },
+                { title: 'Kullanici Tanimlari', to: '/admin/users' },
+                { title: 'Grup Tanimlari', to: '/admin/groups' },
             ],
         },
         // Diðer ana menüleri eklemek istersen buraya

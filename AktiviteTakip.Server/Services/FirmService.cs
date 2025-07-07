@@ -46,7 +46,7 @@ namespace AktiviteTakip.Server.Services
             {
                 return Result<List<FirmDto>>.Failure("Failed to get firms with projects: " + ex.Message);
             }
-}
+        }
 
         public async Task<Result<List<FirmDto>>> GetAllFirmsWithProjectsAsync()
         {

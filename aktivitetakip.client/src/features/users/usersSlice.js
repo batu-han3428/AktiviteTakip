@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Kullanıcıları getir
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async (_, thunkAPI) => {
     const state = thunkAPI.getState();
     const token = state.auth.token;
@@ -25,6 +26,7 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async (_, thunkAP
     return await response.json();
 });
 
+// Kullanıcı aktiflik durumu güncelle
 export const updateUserActiveStatus = createAsyncThunk(
     'users/updateUserActiveStatus',
     async ({ id }, thunkAPI) => {
@@ -37,7 +39,7 @@ export const updateUserActiveStatus = createAsyncThunk(
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ id: id }),
+            body: JSON.stringify({ id }),
         });
 
         if (!response.ok) {
@@ -54,6 +56,62 @@ export const updateUserActiveStatus = createAsyncThunk(
     }
 );
 
+// Yeni kullanıcı oluştur
+export const createUser = createAsyncThunk('users/createUser', async (userData, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const token = state.auth.token;
+
+    const response = await fetch(`${API_BASE_URL}/api/user/create`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Kullanıcı oluşturulamadı';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch {
+            throw new Error(errorMessage);
+        }
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+});
+
+// Var olan kullanıcıyı güncelle
+export const updateUser = createAsyncThunk('users/updateUser', async (userData, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const token = state.auth.token;
+
+    const response = await fetch(`${API_BASE_URL}/api/user/update`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Kullanıcı güncellenemedi';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch {
+            throw new Error(errorMessage);
+        }
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+});
+
 
 const usersSlice = createSlice({
     name: 'users',
@@ -61,12 +119,15 @@ const usersSlice = createSlice({
         list: [],
         loading: false,
         error: null,
-        updateLoading: false,    // güncelleme yükleniyor durumu
-        updateError: null,       // güncelleme hatası
+        updateLoading: false,
+        updateError: null,
+        createLoading: false,
+        createError: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // fetchUsers
             .addCase(fetchUsers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -79,14 +140,14 @@ const usersSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message ?? 'Bilinmeyen bir hata oluştu';
             })
-            // updateUserActiveStatus için reducerlar
+
+            // updateUserActiveStatus
             .addCase(updateUserActiveStatus.pending, (state) => {
                 state.updateLoading = true;
                 state.updateError = null;
             })
             .addCase(updateUserActiveStatus.fulfilled, (state, action) => {
                 state.updateLoading = false;
-                // Eğer API güncellenmiş kullanıcı dönerse, listede güncelle
                 const updatedUser = action.payload;
                 const index = state.list.findIndex(user => user.id === updatedUser.id);
                 if (index !== -1) {
@@ -96,6 +157,29 @@ const usersSlice = createSlice({
             .addCase(updateUserActiveStatus.rejected, (state, action) => {
                 state.updateLoading = false;
                 state.updateError = action.error.message ?? 'Kullanıcı durumu güncellenemedi';
+            })
+
+            // createUser
+            .addCase(createUser.pending, (state) => {
+                state.createLoading = true;
+                state.createError = null;
+            })
+            .addCase(createUser.fulfilled, (state, action) => {
+                state.createLoading = false;
+                state.list.push(action.payload);
+            })
+            .addCase(createUser.rejected, (state, action) => {
+                state.createLoading = false;
+                state.createError = action.error.message ?? 'Kullanıcı oluşturulamadı';
+            })
+
+            // updateUser
+            .addCase(updateUser.fulfilled, (state, action) => {
+                const updatedUser = action.payload;
+                const index = state.list.findIndex(user => user.id === updatedUser.id);
+                if (index !== -1) {
+                    state.list[index] = updatedUser;
+                }
             });
     },
 });

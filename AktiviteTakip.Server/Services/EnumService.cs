@@ -13,5 +13,13 @@ namespace AktiviteTakip.Server.Services
                        .Select(e => new EnumDto { Id = (int)e, Label = e.ToString() })
                        .ToList();
         }
+
+        public IEnumerable<EnumDto> GetRoles()
+        {
+            return Enum.GetValues(typeof(Roles))
+                       .Cast<Roles>()
+                       .Select(e => new EnumDto { Id = (int)e, Label = e.ToString() })
+                       .ToList();
+        }
     }
 }

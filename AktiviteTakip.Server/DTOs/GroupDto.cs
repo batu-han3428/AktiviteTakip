@@ -2,12 +2,11 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public sealed class CategoryDto
+    public sealed class GroupDto
     {
-        [Required]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "İsim zorunludur")]
+        [Required]
         public string Name { get; set; }
     }
 }

@@ -5,5 +5,7 @@ namespace AktiviteTakip.Server.Services.Interfaces
     public interface IEnumService
     {
         IEnumerable<EnumDto> GetLocations();
+
+        IEnumerable<EnumDto> GetRoles();
     }
 }

@@ -25,5 +25,17 @@ namespace AktiviteTakip.Server.Controllers
             var locations = _enumService.GetLocations();
             return Ok(locations);
         }
+
+
+        /// <summary>
+        /// Rolleri listeler
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("roles")]
+        public IActionResult GetRoles()
+        {
+            var locations = _enumService.GetRoles();
+            return Ok(locations);
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace AktiviteTakip.Server.DTOs
 {
-    public class FirmDto
+    public sealed class FirmDto
     {
         [Required]
         public Guid Id { get; set; }
