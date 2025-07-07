@@ -14,6 +14,12 @@ namespace AktiviteTakip.Server.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Kullanıcının sisteme giriş yapmasını sağlar.
+        /// </summary>
+        /// <param name="request">Kullanıcı bilgileri</param>
+        /// <returns></returns>
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
@@ -28,6 +34,12 @@ namespace AktiviteTakip.Server.Controllers
             return Ok(new { Token = result.Data, Message = result.Message });
         }
 
+
+        /// <summary>
+        /// Kullanıcının sisteme kayıt olmasını sağlar.
+        /// </summary>
+        /// <param name="request">Kullanıcı bilgileri</param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {

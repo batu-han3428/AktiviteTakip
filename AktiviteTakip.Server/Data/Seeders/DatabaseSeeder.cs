@@ -16,6 +16,7 @@ namespace AktiviteTakip.Server.Data.Seeders
             await CategorySeeder.SeedAsync(dbContext);
             await FirmSeeder.SeedAsync(dbContext);
             await ProjectSeeder.SeedAsync(dbContext);
+            await UserSeeder.SeedAsync(scope.ServiceProvider);
         }
     }
 }

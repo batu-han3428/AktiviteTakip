@@ -79,6 +79,27 @@ const CalendarPage = () => {
             : events.filter(event => selectedUsers.includes(event.username)))
         : events.filter(event => event.username === user?.username);
 
+    const handleEventDrop = (info) => {
+        const updatedEvent = {
+            id: info.event.id,
+            title: info.event.title,
+            startAt: info.event.start.toISOString(),
+            endAt: info.event.end ? info.event.end.toISOString() : null,
+            description: info.event.extendedProps.description,
+            note: info.event.extendedProps.note,
+            categoryId: info.event.extendedProps.categoryId,
+            locationId: info.event.extendedProps.locationId,
+            projectId: info.event.extendedProps.projectId,
+            firmId: info.event.extendedProps.firmId,
+            username: info.event.extendedProps.username,
+        };
+
+        dispatch(saveEvent({ eventData: updatedEvent, isEditMode: true }));
+    };
+
+    const handleEventResize = handleEventDrop
+
+
     return (
         <div>
             {user?.role === 'admin' && (
@@ -124,7 +145,7 @@ const CalendarPage = () => {
             />
 
             <FullCalendar
-                key={currentView} // görünüm deðiþtiðinde yeniden render için
+                key={currentView}
                 plugins={[timeGridPlugin, interactionPlugin, dayGridPlugin]}
                 initialView={currentView}
                 weekends={false}
@@ -139,6 +160,8 @@ const CalendarPage = () => {
                 timeZone="UTC"
                 locales={allLocales}
                 locale="tr"
+                eventDrop={handleEventDrop}
+                eventResize={handleEventResize}
             />
 
             <EventModal

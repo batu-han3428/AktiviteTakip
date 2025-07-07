@@ -1,12 +1,13 @@
 ﻿using AktiviteTakip.Server.Data;
 using AktiviteTakip.Server.Entities;
+using AktiviteTakip.Server.Entities.Interfaces;
 using AktiviteTakip.Server.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace AktiviteTakip.Server.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : BaseEntity
+    public class Repository<T> : IRepository<T> where T : class, IBaseEntity<Guid>
     {
         protected readonly ApplicationDbContext _context;
         protected readonly DbSet<T> _dbSet;

@@ -16,6 +16,11 @@ namespace AktiviteTakip.Server.Controllers
             _categoryService = categoryService;
         }
 
+
+        /// <summary>
+        /// Kategorileri listeler
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("getcategories")]      
         public async Task<IActionResult> GetCategories()
         {

@@ -5,14 +5,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     const location = useLocation();
     const { isLoggedIn, roles } = useSelector(state => state.auth);
 
+    // Giriþ yapýlmamýþsa login sayfasýna yönlendir
     if (!isLoggedIn) {
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
-    const userRole = roles.length > 0 ? roles[0] : null;
-
-    if (requiredRole && userRole !== requiredRole) {
-        if (location.pathname !== '/calendar') {
+    // Eðer role gerekiyor ve kullanýcýnýn rolü bu deðilse
+    if (requiredRole) {
+        const userRole = roles.length > 0 ? roles[0]?.toLowerCase() : null;
+        if (userRole !== requiredRole.toLowerCase()) {
             return <Navigate to="/calendar" replace />;
         }
     }

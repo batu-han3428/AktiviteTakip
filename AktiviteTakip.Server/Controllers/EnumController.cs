@@ -14,6 +14,11 @@ namespace AktiviteTakip.Server.Controllers
             _enumService = enumService;
         }
 
+
+        /// <summary>
+        /// Konum seçeneklerini listeler
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("locations")]
         public IActionResult GetLocations()
         {

@@ -1,9 +1,9 @@
-﻿using AktiviteTakip.Server.Entities;
+﻿using AktiviteTakip.Server.Entities.Interfaces;
 using System.Linq.Expressions;
 
 namespace AktiviteTakip.Server.Repositories.Interfaces
 {
-    public interface IRepository<T> where T : BaseEntity
+    public interface IRepository<T> where T : class, IBaseEntity<Guid>
     {
         Task AddAsync(T entity);
         Task<IEnumerable<T>> GetAllAsync();

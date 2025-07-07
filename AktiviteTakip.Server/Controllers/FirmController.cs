@@ -16,6 +16,11 @@ namespace AktiviteTakip.Server.Controllers
             _firmService = firmService;
         }
 
+
+        /// <summary>
+        /// Firmaları listeler
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("getfirms")]
         public async Task<IActionResult> GetFirms()
         {
@@ -26,6 +31,12 @@ namespace AktiviteTakip.Server.Controllers
 
             return Ok(result);
         }
+
+
+        /// <summary>
+        /// Firmaları ve projelerini listeler
+        /// </summary>
+        /// <returns></returns>
 
         [HttpGet("getfirmsprojects")]
         public async Task<IActionResult> GetFirmsProjects()
