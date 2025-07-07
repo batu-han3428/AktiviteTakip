@@ -64,10 +64,10 @@ if (token) {
     try {
         const decoded = jwtDecode(token);
 
-        // Token süresi kontrolü
+        // Token s resi kontrol 
         const currentTime = Math.floor(Date.now() / 1000);
         if (decoded.exp && decoded.exp < currentTime) {
-            // Token süresi dolmuþ
+            // Token s resi dolmu 
             localStorage.removeItem('token');
         } else {
             const nameIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';

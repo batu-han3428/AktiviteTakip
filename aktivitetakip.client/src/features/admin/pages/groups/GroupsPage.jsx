@@ -1,6 +1,6 @@
 function GroupsPage() {
   return (
-    <p>Grup sayfası!</p>
+    <p>Grup sayfasÄ±!</p>
   );
 }
 

@@ -8,13 +8,13 @@ const RegisterPage = () => {
         <Container maxWidth="sm">
             <Paper elevation={6} sx={{ p: 4, mt: 8 }}>
                 <Typography variant="h5" align="center" gutterBottom>
-                    Üye Ol
+                    Ãœye Ol
                 </Typography>
                 <RegisterForm />
                 <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
                     <Grid>
                         <Link component={RouterLink} to="/login" variant="body2">
-                            Zaten üye misiniz? Giriþ Yap
+                            Zaten Ã¼ye misiniz? GiriÅŸ Yap
                         </Link>
                     </Grid>
                 </Grid>

@@ -65,11 +65,11 @@ const RouterComponent = () => {
                     <Route index element={<Navigate to="users" replace />} />
                     <Route path="users" element={<UsersPage />} />
                     <Route path="groups" element={<GroupsPage />} />
-                    {/* Diðer admin alt sayfalar */}
+                    {/* Di er admin alt sayfalar */}
                 </Route>
 
 
-                {/* Eðer tanýmlanmamýþ route gelirse login sayfasýna yönlendir */}
+                {/* E er tan mlanmam   route gelirse login sayfas na y nlendir */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>

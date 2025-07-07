@@ -134,11 +134,11 @@ const UsersGrid = () => {
     const handleSaveUser = () => {
         const { email, username, role, userDefinesPassword, password, color, group, id } = userForm;
         if (!email || !username || !role) {
-            alert("E-posta, kullanýcý adý, rol zorunlu!");
+            alert("E-posta, kullan c  ad , rol zorunlu!");
             return;
         }
         if (!userDefinesPassword && !password) {
-            alert("Þifre girilmeli veya 'þifreyi kullanýcý belirlesin' seçilmeli.");
+            alert(" ifre girilmeli veya ' ifreyi kullan c  belirlesin' se ilmeli.");
             return;
         }
         const payload = { email, username, role, group, color };
@@ -205,9 +205,9 @@ const UsersGrid = () => {
     }), []);
     const gridStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
     const localeText = {
-        page: "Sayfa", more: "Daha fazla", to: "ile", of: "arasýnda",
-        next: "Sonraki", previous: "Önceki",
-        equals: "Eþittir", notEqual: "Eþit deðil", contains: "Ýçerir", notContains: "Ýçermez",
+        page: "Sayfa", more: "Daha fazla", to: "ile", of: "aras nda",
+        next: "Sonraki", previous: " nceki",
+        equals: "E ittir", notEqual: "E it de il", contains: "  erir", notContains: "  ermez",
     };
 
     const [showPassword, setShowPassword] = useState(false);
@@ -248,7 +248,7 @@ const UsersGrid = () => {
     });
 
 
-    if (loading || groupsLoading || rolesLoading) return <div>Yükleniyor...</div>;
+    if (loading || groupsLoading || rolesLoading) return <div>Y kleniyor...</div>;
     if (error) return <div style={{ color: "red" }}>Hata: {error}</div>;
 
     return (
@@ -286,22 +286,22 @@ const UsersGrid = () => {
                 <DialogContent>
                     {selectedUser && (
                         <p>
-                            Kullanici <b>{selectedUser.username}</b> için durumu{" "}
-                            <b>{newActiveStatus ? "Aktif" : "Pasif"}</b> olarak deðiþtirmek istediðinize emin misiniz?
+                            Kullanici <b>{selectedUser.username}</b> i in durumu{" "}
+                            <b>{newActiveStatus ? "Aktif" : "Pasif"}</b> olarak de i tirmek istedi inize emin misiniz?
                         </p>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCancel}>Ýptal</Button>
+                    <Button onClick={handleCancel}> ptal</Button>
                     <Button onClick={handleConfirm} variant="contained" color="primary">
                         Onayla
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Kullanýcý Modal */}
+            {/* Kullan c  Modal */}
             <Dialog open={userModalOpen} onClose={handleUserModalClose} fullWidth maxWidth="md">
-                <DialogTitle>{editingMode ? "Kullaniciyi Güncelle" : "Yeni Kullanici Ekle"}</DialogTitle>
+                <DialogTitle>{editingMode ? "Kullaniciyi G ncelle" : "Yeni Kullanici Ekle"}</DialogTitle>
                 <DialogContent>
                     <div style={{
                         display: "grid",
@@ -344,7 +344,7 @@ const UsersGrid = () => {
                             {groups.map(g => <MenuItem key={g.id} value={g.name}>{g.name}</MenuItem>)}
                         </TextField>
 
-                        {/* Renk Seçici */}
+                        {/* Renk Se ici */}
                         <div style={{ gridColumn: "1 / span 2", position: 'relative' }}>
                             <label style={{ marginBottom: "0.5rem", display: "block" }}>Renk</label>
                             <div style={styles.colorBox} onClick={() => setColorPickerOpen(true)} />
@@ -359,7 +359,7 @@ const UsersGrid = () => {
                             )}
                         </div>
 
-                        {/* Þifre Alaný */}
+                        {/*  ifre Alan  */}
                         <div style={{ gridColumn: "1 / span 2" }}>
                             <FormControlLabel
                                 control={

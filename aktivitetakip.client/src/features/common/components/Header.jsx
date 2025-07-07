@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import LogoutIcon from '@mui/icons-material/Logout'; // Çýkýþ ikonu
+import LogoutIcon from '@mui/icons-material/Logout'; // Ã‡Ä±kÄ±ÅŸ ikonu
 
 const Header = () => {
     const roles = useSelector((state) => state.auth.roles);
@@ -16,7 +16,7 @@ const Header = () => {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="sticky" color="primary" sx={{ top: 0, zIndex: 1100 }}>
                 <Toolbar>
-                    {/* Sol taraf: Logo veya baþlýk */}
+                    {/* Sol taraf: Logo veya baÅŸlÄ±k */}
                     <Typography
                         variant="h6"
                         component={RouterLink}
@@ -31,7 +31,7 @@ const Header = () => {
                         Aktivite Takip
                     </Typography>
 
-                    {/* Menü Butonlarý */}
+                    {/* MenÃ¼ ButonlarÄ± */}
                     {roles.includes('Admin') && (
                         <Button
                             color="inherit"
@@ -43,12 +43,12 @@ const Header = () => {
                         </Button>
                     )}
 
-                    {/* Çýkýþ Butonu (ikonlu) */}
+                    {/* Ã‡Ä±kÄ±ÅŸ Butonu (ikonlu) */}
                     <IconButton
                         component={RouterLink}
                         to="/logout"
                         color="inherit"
-                        aria-label="Çýkýþ"
+                        aria-label="Ã‡Ä±kÄ±ÅŸ"
                         size="large"
                     >
                         <LogoutIcon />

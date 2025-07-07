@@ -50,7 +50,7 @@ const EventModal = ({
     const [selectedUsernames, setSelectedUsernames] = useState([user.username]);
 
 
-    // Modal açýlýnca firmalarý ve kategorileri fetch et
+    // Modal a  l nca firmalar  ve kategorileri fetch et
     useEffect(() => {
         if (isOpen) {
             dispatch(fetchFirms());
@@ -58,7 +58,7 @@ const EventModal = ({
         }
     }, [isOpen, dispatch]);
 
-    // Seçilen firmaya göre projeler
+    // Se ilen firmaya g re projeler
     const selectedFirm = firms.find((f) => f.id === firma);
     const projectsForSelectedFirm = selectedFirm ? selectedFirm.projects || [] : [];
 
@@ -106,7 +106,7 @@ const EventModal = ({
     // Kaydet fonksiyonu
     const handleSave = () => {
         if (!title || !description || !category || !startTime || !endTime) {
-            alert('Lütfen tüm gerekli alanlarý doldurun.');
+            alert('L tfen t m gerekli alanlar  doldurun.');
             return;
         }
 
@@ -115,7 +115,7 @@ const EventModal = ({
         const end = new Date(`${currentDateOnly}T${endTime}:00`);
 
         if (isNaN(start) || isNaN(end)) {
-            alert('Geçersiz tarih veya saat!');
+            alert('Ge ersiz tarih veya saat!');
             return;
         }
 
@@ -157,12 +157,12 @@ const EventModal = ({
                 }}
             >
                 <Typography variant="h6" gutterBottom>
-                    {isEditing ? 'Etkinlik Düzenle' : 'Yeni Etkinlik Ekle'}
+                    {isEditing ? 'Etkinlik D zenle' : 'Yeni Etkinlik Ekle'}
                 </Typography>
 
                 {isAdmin && (
                     <FormControl fullWidth margin="normal">
-                        <InputLabel>Kullanýcý Seç</InputLabel>
+                        <InputLabel>Kullan c  Se </InputLabel>
                         <Select
                             multiple
                             value={selectedUsernames}
@@ -180,7 +180,7 @@ const EventModal = ({
                 )}
 
                 <TextField
-                    label="Baþlýk"
+                    label="Ba l k"
                     fullWidth
                     margin="normal"
                     value={title}
@@ -188,7 +188,7 @@ const EventModal = ({
                 />
 
                 <TextField
-                    label="Etkinlik Detayý"
+                    label="Etkinlik Detay "
                     fullWidth
                     multiline
                     rows={4}
@@ -266,7 +266,7 @@ const EventModal = ({
 
                 <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                     <TextField
-                        label="Baþlangýç Saati"
+                        label="Ba lang   Saati"
                         type="time"
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
@@ -275,7 +275,7 @@ const EventModal = ({
                         fullWidth
                     />
                     <TextField
-                        label="Bitiþ Saati"
+                        label="Biti  Saati"
                         type="time"
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
@@ -287,7 +287,7 @@ const EventModal = ({
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3, gap: 1 }}>
                     <Button onClick={onClose} variant="outlined" color="error">
-                        Ýptal
+                         ptal
                     </Button>
                     <Button onClick={handleSave} variant="contained" color="primary">
                         Kaydet

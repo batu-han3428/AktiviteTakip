@@ -21,13 +21,13 @@ const RegisterForm = () => {
         setLocalError(null);
 
         if (password !== passwordConfirm) {
-            setLocalError('Þifreler uyuþmuyor!');
+            setLocalError('Åžifreler uyuÅŸmuyor!');
             return;
         }
 
         const resultAction = await dispatch(registerUser({ username, email, password }));
         if (registerUser.fulfilled.match(resultAction)) {
-            alert('Kayýt baþarýlý! Giriþ sayfasýna yönlendiriliyorsunuz.');
+            alert('KayÄ±t baÅŸarÄ±lÄ±! GiriÅŸ sayfasÄ±na yÃ¶nlendiriliyorsunuz.');
             navigate('/login');
         }
     };
@@ -38,7 +38,7 @@ const RegisterForm = () => {
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             <TextField
-                label="Kullanýcý Adý"
+                label="KullanÄ±cÄ± AdÄ±"
                 fullWidth
                 required
                 margin="normal"
@@ -55,7 +55,7 @@ const RegisterForm = () => {
                 onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
-                label="Þifre"
+                label="Åžifre"
                 type="password"
                 fullWidth
                 required
@@ -64,7 +64,7 @@ const RegisterForm = () => {
                 onChange={(e) => setPassword(e.target.value)}
             />
             <TextField
-                label="Þifre Tekrar"
+                label="Åžifre Tekrar"
                 type="password"
                 fullWidth
                 required
@@ -74,7 +74,7 @@ const RegisterForm = () => {
             />
 
             <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, mb: 2 }} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Kayýt Ol'}
+                {loading ? <CircularProgress size={24} /> : 'KayÄ±t Ol'}
             </Button>
         </Box>
     );

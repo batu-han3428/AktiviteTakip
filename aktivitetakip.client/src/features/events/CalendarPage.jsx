@@ -34,12 +34,12 @@ const CalendarPage = () => {
         dispatch(fetchEvents());
     }, [dispatch]);
 
-    // Kaydetme / Güncelleme iþlemi için dispatch
+    // Kaydetme / G ncelleme i lemi i in dispatch
     const addOrUpdateEvent = (eventData, isEditMode) => {
         dispatch(saveEvent({ eventData, isEditMode }));
     };
 
-    // Takvimde tarih týklanýnca modal açýlýr, yeni etkinlik eklemek için
+    // Takvimde tarih t klan nca modal a  l r, yeni etkinlik eklemek i in
     const handleDateClick = (arg) => {
         setCurrentDate(arg.dateStr);
         setSelectedEvent(null);
@@ -47,7 +47,7 @@ const CalendarPage = () => {
         setModalOpen(true);
     };
 
-    // Takvimde var olan etkinlik týklanýnca modal açýlýr, düzenlemek için
+    // Takvimde var olan etkinlik t klan nca modal a  l r, d zenlemek i in
     const handleEventClick = (arg) => {
         setCurrentDate(arg.event.startStr);
         setSelectedEvent({
@@ -71,8 +71,8 @@ const CalendarPage = () => {
         setSelectedUsers(event.target.value);
     };
 
-    // Admin deðilse sadece kendi etkinlikleri gösterilir,
-    // admin ise seçilen kullanýcýlarýn etkinlikleri veya tüm etkinlikler gösterilir
+    // Admin de ilse sadece kendi etkinlikleri g sterilir,
+    // admin ise se ilen kullan c lar n etkinlikleri veya t m etkinlikler g sterilir
     const filteredEvents = user?.role === 'admin'
         ? (selectedUsers.length === 0
             ? events
@@ -111,7 +111,7 @@ const CalendarPage = () => {
                         Rol
                     </Button>
                     <FormControl fullWidth margin="normal">
-                        <InputLabel>Bir veya Daha Fazla Kullanýcý Seç</InputLabel>
+                        <InputLabel>Bir veya Daha Fazla Kullan c  Se </InputLabel>
                         <Select
                             multiple
                             value={selectedUsers}
@@ -141,7 +141,7 @@ const CalendarPage = () => {
             )}
             <FormControlLabel
                 control={<Switch checked={isMonthlyView} onChange={handleSwitchChange} />}
-                label={isMonthlyView ? "Aylýk Görünüm" : "Haftalýk Görünüm"}
+                label={isMonthlyView ? "Ayl k G r n m" : "Haftal k G r n m"}
             />
 
             <FullCalendar

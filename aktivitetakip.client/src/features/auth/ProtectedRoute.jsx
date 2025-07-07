@@ -5,12 +5,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     const location = useLocation();
     const { isLoggedIn, roles } = useSelector(state => state.auth);
 
-    // Giriş yapılmamışsa login sayfasına yönlendir
+    // GiriÅŸ yapÄ±lmamÄ±ÅŸsa login sayfasÄ±na yÃ¶nlendir
     if (!isLoggedIn) {
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
-    // Eğer role gerekiyor ve kullanıcının rolü bu değilse
+    // EÄŸer role gerekiyor ve kullanÄ±cÄ±nÄ±n rolÃ¼ bu deÄŸilse
     if (requiredRole) {
         const userRole = roles.length > 0 ? roles[0]?.toLowerCase() : null;
         if (userRole !== requiredRole.toLowerCase()) {

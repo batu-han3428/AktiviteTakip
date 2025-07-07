@@ -22,7 +22,7 @@ const LoginForm = () => {
 
     const handleLogin = async () => {
         dispatch(loginUser({ email, password }));
-        // navigate burada deðil, isLoggedIn deðiþince useEffect tetiklenir
+        // navigate burada deÄŸil, isLoggedIn deÄŸiÅŸince useEffect tetiklenir
     };
 
     return (
@@ -41,7 +41,7 @@ const LoginForm = () => {
             />
 
             <TextField
-                label="Þifre"
+                label="Åžifre"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -51,15 +51,15 @@ const LoginForm = () => {
             />
 
             <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, mb: 2 }} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Giriþ Yap'}
+                {loading ? <CircularProgress size={24} /> : 'GiriÅŸ Yap'}
             </Button>
 
             <Grid container justifyContent="space-between">
                 <Grid>
-                    <Link href="/forgot-password" variant="body2">Þifremi Unuttum</Link>
+                    <Link href="/forgot-password" variant="body2">Åžifremi Unuttum</Link>
                 </Grid>
                 <Grid>
-                    <Link href="/register" variant="body2">Üye Ol</Link>
+                    <Link href="/register" variant="body2">Ãœye Ol</Link>
                 </Grid>
             </Grid>
         </Box>

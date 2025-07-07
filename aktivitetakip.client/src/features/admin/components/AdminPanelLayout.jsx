@@ -29,11 +29,11 @@ const AdminPanelLayout = () => {
 
     const navigate = useNavigate();
 
-    // Menü açýk/kapanýk state (responsive için)
+    // Men  a  k/kapan k state (responsive i in)
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    // "Tanýmlar" alt menüsünün açýk-kapalý durumu
-    // Ýlk açýlýþta açýk
+    // "Tan mlar" alt men s n n a  k-kapal  durumu
+    //  lk a  l  ta a  k
     const [openDefinitions, setOpenDefinitions] = useState(true);
 
     if (!user || !user.roles.includes('Admin')) {
@@ -44,7 +44,7 @@ const AdminPanelLayout = () => {
         setMobileOpen(!mobileOpen);
     };
 
-    // Menü elemanlarý - yol ve isimler
+    // Men  elemanlar  - yol ve isimler
     const menuItems = [
         {
             title: 'Tanimlar',
@@ -54,10 +54,10 @@ const AdminPanelLayout = () => {
                 { title: 'Grup Tanimlari', to: '/admin/groups' },
             ],
         },
-        // Diðer ana menüleri eklemek istersen buraya
+        // Di er ana men leri eklemek istersen buraya
     ];
 
-    // Drawer içeriði
+    // Drawer i eri i
     const drawer = (
         <div>
             <Toolbar
@@ -100,7 +100,7 @@ const AdminPanelLayout = () => {
                                         component={Link}
                                         to={child.to}
                                         selected={location.pathname === child.to}
-                                        onClick={() => setMobileOpen(false)} // mobilde týklanýnca menüyü kapat
+                                        onClick={() => setMobileOpen(false)} // mobilde t klan nca men y  kapat
                                     >
                                         <ListItemText primary={child.title} />
                                     </ListItemButton>
@@ -128,7 +128,7 @@ const AdminPanelLayout = () => {
                     open={mobileOpen}
                     onClose={handleDrawerToggle}
                     ModalProps={{
-                        keepMounted: true, // performans için
+                        keepMounted: true, // performans i in
                     }}
                     sx={{
                         display: { xs: 'block', sm: 'none' },
@@ -151,9 +151,9 @@ const AdminPanelLayout = () => {
                 </Drawer>
             </Box>
 
-            {/* Ýçerik alaný */}
+            {/*   erik alan  */}
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                {/* Toolbar boþluk býrakmak için */}
+                {/* Toolbar bo luk b rakmak i in */}
                 <Toolbar sx={{ display: { sm: 'none' } }}>
                     <IconButton
                         color="inherit"

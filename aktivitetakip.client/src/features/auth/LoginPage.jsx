@@ -7,7 +7,7 @@ const LoginPage = () => {
         <Container maxWidth="sm">
             <Paper elevation={6} sx={{ p: 4, mt: 8 }}>
                 <Typography variant="h4" align="center" gutterBottom>
-                    Giriþ Yap
+                    GiriÅŸ Yap
                 </Typography>
                 <LoginForm />
             </Paper>
