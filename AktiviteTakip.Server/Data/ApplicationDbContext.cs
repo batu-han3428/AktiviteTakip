@@ -54,13 +54,13 @@ namespace AktiviteTakip.Server.Data
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedAt = DateTime.UtcNow;
+                    entry.Entity.CreatedAt = DateTime.Now;
                     entry.Entity.CreatedBy = userId;
                     entry.Entity.IsActive = true;
                 }
                 else if (entry.State == EntityState.Modified)
                 {
-                    entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    entry.Entity.UpdatedAt = DateTime.Now;
                     entry.Entity.UpdatedBy = userId;
                 }
             }

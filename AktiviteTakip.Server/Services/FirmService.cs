@@ -2,42 +2,56 @@
 using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Services.Interfaces;
 using AktiviteTakip.Server.UnitOfWork.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace AktiviteTakip.Server.Services
 {
     public class FirmService : IFirmService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
+        private readonly ICacheService _cacheService;
         private static readonly string FirmsCacheKey = "firmsCacheKey";
         private static readonly string FirmsProjectsCacheKey = "firmsProjectsCacheKey";
 
-        public FirmService(IUnitOfWork unitOfWork, IMemoryCache cache)
+        public FirmService(IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<List<FirmDto>>> GetAllFirmsAsync()
         {
-            var firms = await _unitOfWork.Firms.GetAllAsync();
+            try { 
+                var cachedFirms = _cacheService.Get<List<FirmDto>>(FirmsCacheKey);
+                if (cachedFirms != null)
+                {
+                    return Result<List<FirmDto>>.SuccessResult(cachedFirms);
+                }
 
-            if (firms == null || !firms.Any())
-                return Result<List<FirmDto>>.Failure("Hiç bir firma bulunamadı.");
+                var firms = await _unitOfWork.Firms.GetAllAsync();
 
-            var firmDtos = firms.Select(f => new FirmDto
+                if (firms == null || !firms.Any())
+                    return Result<List<FirmDto>>.Failure("Hiç bir firma bulunamadı.");
+
+                var firmDtos = firms.Select(f => new FirmDto
+                {
+                    Id = f.Id,
+                    Name = f.Name
+                }).ToList();
+
+                _cacheService.Set(FirmsCacheKey, firmDtos);
+
+                return Result<List<FirmDto>>.SuccessResult(firmDtos);
+            }
+            catch (Exception ex)
             {
-                Id = f.Id,
-                Name = f.Name
-            }).ToList();
-
-            return Result<List<FirmDto>>.SuccessResult(firmDtos);
-        }
+                return Result<List<FirmDto>>.Failure("Failed to get firms with projects: " + ex.Message);
+            }
+}
 
         public async Task<Result<List<FirmDto>>> GetAllFirmsWithProjectsAsync()
         {
-            if (_cache.TryGetValue(FirmsProjectsCacheKey, out List<FirmDto> cachedFirms))
+            var cachedFirms = _cacheService.Get<List<FirmDto>>(FirmsProjectsCacheKey);
+            if (cachedFirms != null)
             {
                 return Result<List<FirmDto>>.SuccessResult(cachedFirms);
             }
@@ -60,7 +74,7 @@ namespace AktiviteTakip.Server.Services
                     }).ToList()
                 }).ToList();
 
-                _cache.Set(FirmsProjectsCacheKey, firmDtos);
+                _cacheService.Set(FirmsProjectsCacheKey, firmDtos);
 
                 return Result<List<FirmDto>>.SuccessResult(firmDtos);
             }

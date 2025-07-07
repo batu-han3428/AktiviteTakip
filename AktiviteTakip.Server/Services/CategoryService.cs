@@ -2,25 +2,25 @@
 using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Services.Interfaces;
 using AktiviteTakip.Server.UnitOfWork.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace AktiviteTakip.Server.Services
 {
     public class CategoryService: ICategoryService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
+        private readonly ICacheService _cacheService;
         private static readonly string CategoriesCacheKey = "categoriesCacheKey";
 
-        public CategoryService(IUnitOfWork unitOfWork, IMemoryCache cache)
+        public CategoryService(IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<List<CategoryDto>>> GetAllCategoriesAsync()
         {
-            if (_cache.TryGetValue(CategoriesCacheKey, out List<CategoryDto> cachedCategories))
+            var cachedCategories = _cacheService.Get<List<CategoryDto>>(CategoriesCacheKey);
+            if (cachedCategories != null)
             {
                 return Result<List<CategoryDto>>.SuccessResult(cachedCategories);
             }
@@ -38,7 +38,7 @@ namespace AktiviteTakip.Server.Services
                     Name = f.Name
                 }).ToList();
 
-                _cache.Set(CategoriesCacheKey, categoryDtos);
+                _cacheService.Set(CategoriesCacheKey, categoryDtos);
 
                 return Result<List<CategoryDto>>.SuccessResult(categoryDtos);
             }

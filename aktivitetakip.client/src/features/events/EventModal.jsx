@@ -62,21 +62,21 @@ const EventModal = ({
     const selectedFirm = firms.find((f) => f.id === firma);
     const projectsForSelectedFirm = selectedFirm ? selectedFirm.projects || [] : [];
 
-    // selectedEvent varsa formu doldur
     useEffect(() => {
-        if (selectedEvent) {
+        if (selectedEvent && firms.length > 0 && categories.length > 0) {
             setTitle(selectedEvent.title || '');
             setDescription(selectedEvent.extendedProps?.description || '');
             setCategory(selectedEvent.extendedProps?.categoryId || '');
-            setFirma(selectedEvent.extendedProps?.firma || '');
-            setProje(selectedEvent.extendedProps?.proje || '');
+            setFirma(selectedEvent.extendedProps?.firmId || '');
+            setProje(selectedEvent.extendedProps?.projectId || '');
+            setLocation(selectedEvent.extendedProps?.locationId || '');
             setNote(selectedEvent.extendedProps?.note || '');
-            setLocation(selectedEvent.extendedProps?.location || '');
+
             const startDate = new Date(selectedEvent.start);
             const endDate = new Date(selectedEvent.end);
             setStartTime(startDate.toISOString().substring(11, 16));
             setEndTime(endDate.toISOString().substring(11, 16));
-        } else {
+        } else if (!selectedEvent) {
             setTitle('');
             setDescription('');
             setCategory('');
@@ -87,9 +87,8 @@ const EventModal = ({
             setStartTime('');
             setEndTime('');
         }
-    }, [selectedEvent, user.username]);
+    }, [selectedEvent, firms, categories]);
 
-    // Modal kapandýðýnda formu sýfýrla
     useEffect(() => {
         if (!isOpen) {
             setTitle('');
@@ -133,7 +132,6 @@ const EventModal = ({
             locationId: location,
             participants: selectedUsernames,
         };
-
 
         onSave(eventData, isEditing);
         onClose();

@@ -10,6 +10,7 @@ namespace AktiviteTakip.Server.Configurations
     {
         public static void AddApplicationServices(this IServiceCollection services)
         {
+            services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IFirmService, FirmService>();

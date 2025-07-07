@@ -31,5 +31,30 @@ namespace AktiviteTakip.Server.Controllers
 
             return BadRequest(result);
         }
+
+        [HttpGet("getevents")]
+        public async Task<IActionResult> GetEvents(string? username = null)
+        {
+            var result = await _eventService.GetEventsAsync(username);
+
+            if (result.Success)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
+
+        [HttpPut("updateevent/{id:guid}")]
+        public async Task<IActionResult> UpdateEvent(Guid id, CreateEventDto updatedEventDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Geçersiz veri.");
+
+            var result = await _eventService.UpdateEventAsync(id, updatedEventDto);
+
+            if (result.Success)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
     }
 }
