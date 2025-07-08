@@ -1,7 +1,13 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+// tüm importlar aynen korunuyor
+import React, { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUsers, updateUserActiveStatus, createUser, updateUser } from "../../../users/usersSlice";
+import {
+    fetchUsers,
+    updateUserActiveStatus,
+    createUser,
+    updateUser,
+} from "../../../users/usersSlice";
 import Switch from "@mui/material/Switch";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,12 +26,11 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-
 import { fetchGroups } from "../groups/groupsSlice";
 import { fetchRoles } from "../roles/rolesSlice";
 
-import reactCSS from 'reactcss';
-import { useClickAway } from 'react-use';
+import reactCSS from "reactcss";
+import { useClickAway } from "react-use";
 
 import {
     ModuleRegistry,
@@ -35,6 +40,7 @@ import {
     PaginationModule,
     LocaleModule,
     CsvExportModule,
+    RowSelectionModule,
 } from "ag-grid-community";
 
 ModuleRegistry.registerModules([
@@ -44,19 +50,24 @@ ModuleRegistry.registerModules([
     LocaleModule,
     CsvExportModule,
     ValidationModule,
+    RowSelectionModule,
 ]);
 
 const generatePassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
     return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 };
 
 const UsersGrid = () => {
     const dispatch = useDispatch();
     const { list: users, loading, error } = useSelector((state) => state.users);
-    const { list: groups, loading: groupsLoading } = useSelector(state => state.groups);
-    const { list: roles, loading: rolesLoading } = useSelector(state => state.roles);
+    const { list: groups, loading: groupsLoading } = useSelector((state) => state.groups);
+    const { list: roles, loading: rolesLoading } = useSelector((state) => state.roles);
     const gridRef = useRef();
+
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [filterActiveOnly, setFilterActiveOnly] = useState(false);
 
     useEffect(() => {
         dispatch(fetchUsers());
@@ -80,30 +91,21 @@ const UsersGrid = () => {
         userDefinesPassword: false,
     });
 
-    const handleToggleClick = (user, currentValue, event) => {
-        event.target.blur();
-        setSelectedUser(user);
-        setNewActiveStatus(!currentValue);
-        setConfirmDialogOpen(true);
-    };
-
-    const handleConfirm = () => {
-        dispatch(updateUserActiveStatus({ id: selectedUser.id })).then(() => {
-            setConfirmDialogOpen(false);
-            dispatch(fetchUsers());
-        });
-    };
-
-    const handleCancel = () => {
-        setConfirmDialogOpen(false);
-    };
+    const sortedRoles = useMemo(() => {
+        if (!roles) return [];
+        // user rolünü başa al, diğerlerini sırala
+        const userRole = roles.find(r => r.label.toLowerCase() === 'user');
+        const otherRoles = roles.filter(r => r.label.toLowerCase() !== 'user');
+        return userRole ? [userRole, ...otherRoles] : otherRoles;
+    }, [roles]);
 
     const handleAddOpen = () => {
         setEditingMode(false);
+        const userRole = sortedRoles.find(r => r.label.toLowerCase() === 'user');
         setUserForm({
             email: "",
             username: "",
-            role: "",
+            role: userRole ? userRole.id : "",
             group: "",
             color: "#000000",
             password: "",
@@ -112,13 +114,20 @@ const UsersGrid = () => {
         setUserModalOpen(true);
     };
 
-    const handleEdit = (user) => {
+    // Editing moda geçerken
+    const handleEdit = () => {
+        if (!selectedRow) return;
+        const user = selectedRow;
+
+        const roleId = roles.find(r => r.label === user.role)?.id || "";
+        const groupName = groups.find(g => g.name === user.group)?.name || "";
+
         setEditingMode(true);
         setUserForm({
             email: user.email,
             username: user.username,
-            role: user.role,
-            group: user.group,
+            role: roleId,
+            group: groupName,
             color: user.color,
             password: "",
             userDefinesPassword: true,
@@ -127,27 +136,56 @@ const UsersGrid = () => {
         setUserModalOpen(true);
     };
 
-    const handleUserModalClose = () => setUserModalOpen(false);
+    const handleToggleClick = (user, currentValue, event) => {
+        event.target.blur();
+        setSelectedUser(user);
+        setNewActiveStatus(!currentValue);
+        setConfirmDialogOpen(true);
+    };
 
-    const handleGeneratePassword = () => setUserForm(prev => ({ ...prev, password: generatePassword() }));
+    const handleDelete = () => {
+        if (!selectedRow) return;
+        setSelectedUser(selectedRow);
+        setNewActiveStatus(!selectedRow.isActive);
+        setConfirmDialogOpen(true);
+    };
+
+    const handleConfirm = () => {
+        dispatch(updateUserActiveStatus({ id: selectedUser.id })).then(() => {
+            setConfirmDialogOpen(false);
+            dispatch(fetchUsers());
+            setSelectedRow(null);
+        });
+    };
+
+    const handleCancel = () => {
+        setConfirmDialogOpen(false);
+    };
+
+    const handleGeneratePassword = () =>
+        setUserForm((prev) => ({ ...prev, password: generatePassword() }));
 
     const handleSaveUser = () => {
         const { email, username, role, userDefinesPassword, password, color, group, id } = userForm;
         if (!email || !username || !role) {
-            alert("E-posta, kullan c  ad , rol zorunlu!");
+            alert("E-posta, kullanıcı adı ve rol zorunludur!");
             return;
         }
         if (!userDefinesPassword && !password) {
-            alert(" ifre girilmeli veya ' ifreyi kullan c  belirlesin' se ilmeli.");
+            alert("Şifre girilmeli veya 'şifreyi kullanıcı belirlesin' seçilmeli.");
             return;
         }
         const payload = { email, username, role, group, color };
         if (!userDefinesPassword) payload.password = password;
 
-        if (editingMode) dispatch(updateUser({ id, ...payload })).then(() => dispatch(fetchUsers()));
-        else dispatch(createUser(payload)).then(() => dispatch(fetchUsers()));
+        if (editingMode) {
+            dispatch(updateUser({ id, ...payload })).then(() => dispatch(fetchUsers()));
+        } else {
+            dispatch(createUser(payload)).then(() => dispatch(fetchUsers()));
+        }
 
-        handleUserModalClose();
+        setUserModalOpen(false);
+        setSelectedRow(null);
     };
 
     const columnDefs = useMemo(() => [
@@ -167,188 +205,159 @@ const UsersGrid = () => {
         { headerName: "Rol", field: "role", flex: 1, filter: true },
         { headerName: "Grup", field: "group", flex: 1, filter: true },
         {
-            headerName: "Renk", field: "color", flex: 1, filter: false, sortable: false,
-            cellRenderer: params => (
-                <div style={{
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    height: "100%", minHeight: "40px"
-                }}>
+            headerName: "Renk",
+            field: "color",
+            flex: 1,
+            filter: false,
+            sortable: false,
+            cellRenderer: (params) => (
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
                     <div style={{
-                        width: 24, height: 24, backgroundColor: params.value,
-                        borderRadius: 4, border: "1px solid #ccc"
+                        width: 24,
+                        height: 24,
+                        backgroundColor: params.value,
+                        borderRadius: 4,
+                        border: "1px solid #ccc"
                     }} />
                 </div>
-            )
-        },
-        {
-            headerName: "Islemler", pinned: "right", width: 120,
-            cellRenderer: params => (
-                <>
-                    <IconButton onClick={() => handleEdit(params.data)} size="small" color="primary">
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => console.log("delete", params.data)} size="small" color="error">
-                        <DeleteIcon />
-                    </IconButton>
-                </>
             ),
-            sortable: false, filter: false,
         },
     ], []);
 
     const defaultColDef = useMemo(() => ({
-        flex: 1, minWidth: 120, sortable: true, filter: true, resizable: true,
+        flex: 1,
+        minWidth: 120,
+        sortable: true,
+        filter: true,
+        resizable: true,
     }), []);
-
-    const containerStyle = useMemo(() => ({
-        width: "100%", height: "calc(100vh - 150px)", overflowX: "auto", overflowY: "hidden",
-    }), []);
-    const gridStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
-    const localeText = {
-        page: "Sayfa", more: "Daha fazla", to: "ile", of: "aras nda",
-        next: "Sonraki", previous: " nceki",
-        equals: "E ittir", notEqual: "E it de il", contains: "  erir", notContains: "  ermez",
-    };
 
     const [showPassword, setShowPassword] = useState(false);
-
-
-
-
-    // State ekle
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
-
-    // Ref
     const popoverRef = useRef(null);
     useClickAway(popoverRef, () => setColorPickerOpen(false));
 
-    // Style
     const styles = reactCSS({
-        'default': {
+        default: {
             colorBox: {
-                width: '36px',
-                height: '20px',
-                borderRadius: '4px',
+                width: "36px",
+                height: "20px",
+                borderRadius: "4px",
                 background: userForm.color,
-                border: '1px solid #ccc',
-                cursor: 'pointer',
+                border: "1px solid #ccc",
+                cursor: "pointer",
             },
-            popover: {
-                position: 'absolute',
-                zIndex: '999',
-            },
-            cover: {
-                position: 'fixed',
-                top: '0px',
-                right: '0px',
-                bottom: '0px',
-                left: '0px',
-            },
+            popover: { position: "absolute", zIndex: "999" },
         },
     });
 
+    const filteredUsers = useMemo(() => {
+        return filterActiveOnly ? users.filter((u) => u.isActive) : users;
+    }, [users, filterActiveOnly]);
 
-    if (loading || groupsLoading || rolesLoading) return <div>Y kleniyor...</div>;
+
+
+    const handleSelectionChanged = useCallback(() => {
+        if (gridRef.current && gridRef.current.api) {
+            const selectedNodes = gridRef.current.api.getSelectedNodes();
+            setSelectedRow(selectedNodes.length > 0 ? selectedNodes[0].data : null);
+        }
+    }, []);
+
+    const addButtonRef = useRef(null);
+    const handleUserModalExited = () => {
+        if (addButtonRef.current) {
+            addButtonRef.current.focus();
+        }
+    };
+
+    if (loading || groupsLoading || rolesLoading) return <div>Yükleniyor...</div>;
     if (error) return <div style={{ color: "red" }}>Hata: {error}</div>;
 
     return (
         <div>
-            <div style={{ marginBottom: 10, display: "flex", justifyContent: "space-between" }}>
+            <div style={{ marginBottom: 10, display: "flex", gap: 8, alignItems: "center" }}>
+                <Button variant="contained" color="primary" onClick={handleAddOpen}>+ Ekle</Button>
+                <Button variant="contained" onClick={handleEdit} disabled={!selectedRow}>Güncelle</Button>
+                <Button variant="contained" color="error" onClick={handleDelete} disabled={!selectedRow}>Sil</Button>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={filterActiveOnly}
+                            onChange={(e) => setFilterActiveOnly(e.target.checked)}
+                        />
+                    }
+                    label="Aktif kullanıcıları göster"
+                />
                 <Button variant="contained" onClick={() => gridRef.current.api.exportDataAsCsv()}>
-                    Export CSV
+                    CSV Export
                 </Button>
-                <Button variant="contained" color="primary" onClick={handleAddOpen}>
-                    + Kullanici Ekle
-                </Button>
-            </div>
-            <div style={containerStyle}>
-                <div style={gridStyle} className="ag-theme-alpine">
-                    <AgGridReact
-                        ref={gridRef}
-                        rowData={users}
-                        columnDefs={columnDefs}
-                        defaultColDef={defaultColDef}
-                        pagination
-                        paginationPageSize={20}
-                        animateRows
-                        localeText={localeText}
-                        suppressHorizontalScroll={false}
-                        enableCellTextSelection
-                        domLayout="normal"
-                        suppressColumnVirtualisation
-                    />
-                </div>
             </div>
 
-            {/* Aktiflik Onay */}
-            <Dialog open={confirmDialogOpen} onClose={handleCancel}>
-                <DialogTitle>Durumu Degistir</DialogTitle>
+            <div style={{ width: "100%", height: "calc(100vh - 150px)" }} className="ag-theme-alpine">
+                <AgGridReact
+                    ref={gridRef}
+                    rowData={filteredUsers}
+                    columnDefs={columnDefs}
+                    defaultColDef={defaultColDef}
+                    pagination
+                    paginationPageSize={20}
+                    rowSelection={{
+                        mode: "singleRow", checkboxes: false,
+                        enableClickSelection: true, }}
+                    onSelectionChanged={handleSelectionChanged}
+                    getRowId={(params) => params.data.id}
+                />
+            </div>
+
+            {/* Confirm Dialog */}
+            <Dialog open={confirmDialogOpen} onClose={handleCancel} disableEnforceFocus disableRestoreFocus>
+                <DialogTitle>Durumu Değiştir</DialogTitle>
                 <DialogContent>
                     {selectedUser && (
                         <p>
-                            Kullanici <b>{selectedUser.username}</b> i in durumu{" "}
-                            <b>{newActiveStatus ? "Aktif" : "Pasif"}</b> olarak de i tirmek istedi inize emin misiniz?
+                            Kullanıcı <b>{selectedUser.username}</b> için durumu{" "}
+                            <b>{newActiveStatus ? "Aktif" : "Pasif"}</b> yapmak istediğinizden emin misiniz?
                         </p>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCancel}> ptal</Button>
-                    <Button onClick={handleConfirm} variant="contained" color="primary">
-                        Onayla
-                    </Button>
+                    <Button onClick={handleCancel}>İptal</Button>
+                    <Button onClick={handleConfirm} variant="contained" color="primary">Onayla</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Kullan c  Modal */}
-            <Dialog open={userModalOpen} onClose={handleUserModalClose} fullWidth maxWidth="md">
-                <DialogTitle>{editingMode ? "Kullaniciyi G ncelle" : "Yeni Kullanici Ekle"}</DialogTitle>
+            {/* Kullanıcı Modal */}
+            <Dialog open={userModalOpen} disableEnforceFocus disableRestoreFocus onClose={() => setUserModalOpen(false)} fullWidth maxWidth="md" TransitionProps={{ onExited: handleUserModalExited }}>
+                <DialogTitle>{editingMode ? "Kullanıcıyı Güncelle" : "Yeni Kullanıcı Ekle"}</DialogTitle>
                 <DialogContent>
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "1.5rem",
-                        marginTop: "1rem"
-                    }}>
-                        <TextField
-                            label="E-posta"
-                            value={userForm.email}
-                            disabled={editingMode}
-                            required
-                            fullWidth
-                            onChange={e => setUserForm({ ...userForm, email: e.target.value })}
-                        />
-                        <TextField
-                            label="Kullanici Adi"
-                            value={userForm.username}
-                            required
-                            fullWidth
-                            onChange={e => setUserForm({ ...userForm, username: e.target.value })}
-                        />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1rem" }}>
+                        <TextField label="E-posta" value={userForm.email} disabled={editingMode} fullWidth required
+                            onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} />
+                        <TextField label="Kullanıcı Adı" value={userForm.username} fullWidth required
+                            onChange={(e) => setUserForm({ ...userForm, username: e.target.value })} />
                         <TextField
                             select
                             label="Rol"
-                            value={userForm.role}
+                            value={userForm.role || ""}
+                            fullWidth
                             required
-                            fullWidth
-                            onChange={e => setUserForm({ ...userForm, role: e.target.value })}
+                            onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
                         >
-                            {roles.map(r => <MenuItem key={r.id} value={r.id}>{r.label}</MenuItem>)}
+                            {sortedRoles.map(r => (
+                                <MenuItem key={r.id} value={r.id}>
+                                    {r.label}
+                                </MenuItem>
+                            ))}
                         </TextField>
-                        <TextField
-                            select
-                            label="Grup"
-                            value={userForm.group}
-                            fullWidth
-                            onChange={e => setUserForm({ ...userForm, group: e.target.value })}
-                        >
+                        <TextField select label="Grup" value={userForm.group} fullWidth
+                            onChange={(e) => setUserForm({ ...userForm, group: e.target.value })}>
                             {groups.map(g => <MenuItem key={g.id} value={g.name}>{g.name}</MenuItem>)}
                         </TextField>
 
-                        {/* Renk Se ici */}
-                        <div style={{ gridColumn: "1 / span 2", position: 'relative' }}>
-                            <label style={{ marginBottom: "0.5rem", display: "block" }}>Renk</label>
+                        <div style={{ gridColumn: "1 / span 2", position: "relative" }}>
+                            <label>Renk</label>
                             <div style={styles.colorBox} onClick={() => setColorPickerOpen(true)} />
-
                             {colorPickerOpen && (
                                 <div style={styles.popover} ref={popoverRef}>
                                     <SketchPicker
@@ -359,54 +368,50 @@ const UsersGrid = () => {
                             )}
                         </div>
 
-                        {/*  ifre Alan  */}
                         <div style={{ gridColumn: "1 / span 2" }}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
                                         checked={userForm.userDefinesPassword}
-                                        onChange={e => setUserForm({
-                                            ...userForm,
-                                            userDefinesPassword: e.target.checked,
-                                            password: ""
-                                        })}
+                                        onChange={(e) =>
+                                            setUserForm({
+                                                ...userForm,
+                                                userDefinesPassword: e.target.checked,
+                                                password: "",
+                                            })
+                                        }
                                     />
                                 }
-                                label="Sifreyi kullanici belirlesin"
+                                label="Şifreyi kullanıcı belirlesin"
                             />
                             {!userForm.userDefinesPassword && (
                                 <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginTop: "0.5rem" }}>
                                     <TextField
-                                        label="Sifre"
+                                        label="Şifre"
                                         type={showPassword ? "text" : "password"}
                                         value={userForm.password}
                                         fullWidth
-                                        onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                        onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
                                         InputProps={{
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <IconButton onClick={() => setShowPassword(prev => !prev)}>
+                                                    <IconButton onClick={() => setShowPassword((prev) => !prev)}>
                                                         {showPassword ? <VisibilityOff /> : <Visibility />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             ),
                                         }}
                                     />
-
-                                    <Button onClick={handleGeneratePassword}>Sifre Olustur</Button>
+                                    <Button onClick={handleGeneratePassword}>Şifre Oluştur</Button>
                                 </div>
                             )}
                         </div>
-
-                     
-
                     </div>
                 </DialogContent>
-
                 <DialogActions>
-                    <Button onClick={handleUserModalClose}>Iptal</Button>
+                    <Button onClick={() => setUserModalOpen(false)}>İptal</Button>
                     <Button onClick={handleSaveUser} variant="contained" color="primary">
-                        {editingMode ? "Guncelle" : "Kaydet"}
+                        {editingMode ? "Güncelle" : "Kaydet"}
                     </Button>
                 </DialogActions>
             </Dialog>
