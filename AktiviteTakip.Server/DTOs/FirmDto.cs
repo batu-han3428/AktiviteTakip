@@ -9,6 +9,6 @@ namespace AktiviteTakip.Server.DTOs
 
         [Required(ErrorMessage = "Name zorunludur")]
         public string Name { get; set; } = null!;
-        public List<ProjectDto> Projects { get; set; }
+        public List<ProjectDto>? Projects { get; set; }
     }
 }

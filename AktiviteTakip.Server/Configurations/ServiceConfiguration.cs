@@ -23,6 +23,7 @@ namespace AktiviteTakip.Server.Configurations
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IEmailSender, SmtpEmailSender>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
         }

@@ -9,24 +9,24 @@ namespace AktiviteTakip.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CategoryController : ControllerBase
+    public class ProjectController : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
+        private readonly IProjectService _projectService;
 
-        public CategoryController(ICategoryService categoryService)
+        public ProjectController(IProjectService projectService)
         {
-            _categoryService = categoryService;
+            _projectService = projectService;
         }
 
 
         /// <summary>
-        /// Kategorileri listeler
+        /// Projeleri listeler
         /// </summary>
         /// <returns></returns>
-        [HttpGet("getcategories")]      
-        public async Task<IActionResult> GetCategories()
+        [HttpGet("getprojects")]
+        public async Task<IActionResult> GetProjects()
         {
-            var result = await _categoryService.GetAllCategoriesAsync();
+            var result = await _projectService.GetAllProjectsAsync();
 
             if (!result.Success)
                 return BadRequest(result);
@@ -36,18 +36,18 @@ namespace AktiviteTakip.Server.Controllers
 
 
         /// <summary>
-        /// Kategori ekler
+        /// Proje ekler
         /// </summary>
-        /// <param name="dto">Kategori bilgileri</param>
+        /// <param name="dto">Proje bilgileri</param>
         /// <returns></returns>
-        [HttpPost("addcategory")]
+        [HttpPost("addproject")]
         [Authorize(Roles = nameof(Roles.Admin))]
-        public async Task<IActionResult> AddCategory(AddCategoryDto dto)
+        public async Task<IActionResult> AddProject(AddProjectDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Kategori bilgileri eksik veya geçersiz.");
+                return BadRequest("Geçersiz proje verisi.");
 
-            var result = await _categoryService.AddCategoryAsync(dto);
+            var result = await _projectService.AddProjectAsync(dto);
 
             if (!result.Success)
                 return BadRequest(result.Message);
@@ -57,18 +57,18 @@ namespace AktiviteTakip.Server.Controllers
 
 
         /// <summary>
-        /// Kategori günceller
+        /// Seçili projeyi günceller
         /// </summary>
-        /// <param name="dto">Kategori bilgileri</param>
+        /// <param name="dto">Proje bilgileri</param>
         /// <returns></returns>
-        [HttpPut("updatecategory")]
+        [HttpPut("updateproject")]
         [Authorize(Roles = nameof(Roles.Admin))]
-        public async Task<IActionResult> UpdateCategory(CategoryDto dto)
+        public async Task<IActionResult> UpdateProject(UpdateProjectDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Geçersiz kategori bilgisi.");
+                return BadRequest("Geçersiz proje bilgisi.");
 
-            var result = await _categoryService.UpdateCategoryAsync(dto);
+            var result = await _projectService.UpdateProjectAsync(dto);
 
             if (!result.Success)
                 return BadRequest(result.Message);
@@ -78,18 +78,18 @@ namespace AktiviteTakip.Server.Controllers
 
 
         /// <summary>
-        /// Kategoriyi siler
+        /// Seçili projeyi siler
         /// </summary>
-        /// <param name="id">Kategori id</param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("deletecategory")]
+        [HttpDelete("deleteproject")]
         [Authorize(Roles = nameof(Roles.Admin))]
-        public async Task<IActionResult> DeleteCategory(Guid id)
+        public async Task<IActionResult> DeleteProject(Guid id)
         {
             if (id == Guid.Empty)
-                return BadRequest("Geçersiz firma ID.");
+                return BadRequest("Geçersiz proje ID.");
 
-            var result = await _categoryService.DeleteCategoryAsync(id);
+            var result = await _projectService.DeleteProjectAsync(id);
 
             if (!result.Success)
                 return BadRequest(result.Message);

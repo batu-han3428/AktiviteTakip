@@ -228,34 +228,6 @@ public class UserService : IUserService
         }
     }
 
-    //public async Task<bool> VerifyResetTokenAsync(string userId, string token)
-    //{
-    //    var user = await _unitOfWork.UserManager.FindByIdAsync(userId);
-    //    if (user == null) return false;
-
-    //    var isValid = await _unitOfWork.UserManager.VerifyUserTokenAsync(
-    //        user,
-    //        _unitOfWork.UserManager.Options.Tokens.PasswordResetTokenProvider,
-    //        "ResetPassword",
-    //        token);
-
-    //    return isValid;
-    //}
-
-    //public async Task<Result<bool>> ResetPasswordAsync(string userId, string token, string newPassword)
-    //{
-    //    var user = await _unitOfWork.UserManager.FindByIdAsync(userId);
-    //    if (user == null)
-    //        return Result<bool>.Failure("Kullanıcı bulunamadı.");
-
-    //    var result = await _unitOfWork.UserManager.ResetPasswordAsync(user, token, newPassword);
-    //    if (result.Succeeded)
-    //        return Result<bool>.SuccessResult(true, "Şifre sıfırlandı.");
-
-    //    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-    //    return Result<bool>.Failure(errors);
-    //}
-
     public async Task<Result<UserDto>> UpdateUserAsync(UpdateUserDto dto)
     {
         try

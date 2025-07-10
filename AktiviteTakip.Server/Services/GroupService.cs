@@ -66,13 +66,15 @@ namespace AktiviteTakip.Server.Services
                 await _unitOfWork.Groups.AddAsync(newGroup);
                 await _unitOfWork.CommitAsync();
 
-                _cacheService.Remove(GroupsCacheKey);
-
                 var resultDto = new GroupDto
                 {
                     Id = newGroup.Id,
                     Name = newGroup.Name
                 };
+
+                var cachedGroups = _cacheService.Get<List<GroupDto>>(GroupsCacheKey) ?? new List<GroupDto>();
+                cachedGroups.Add(resultDto);
+                _cacheService.Set(GroupsCacheKey, cachedGroups);
 
                 return Result<GroupDto>.SuccessResult(resultDto, "Grup başarıyla oluşturuldu.");
             }
@@ -101,14 +103,25 @@ namespace AktiviteTakip.Server.Services
 
                 _unitOfWork.Groups.Update(group);
                 await _unitOfWork.CommitAsync();
-
-                _cacheService.Remove(GroupsCacheKey);
-
+              
                 var resultDto = new GroupDto
                 {
                     Id = group.Id,
                     Name = group.Name
                 };
+
+                var cachedGroups = _cacheService.Get<List<GroupDto>>(GroupsCacheKey) ?? new List<GroupDto>();
+                var cachedGroup = cachedGroups.FirstOrDefault(g => g.Id == dto.Id);
+                if (cachedGroup != null)
+                {
+                    cachedGroup.Name = dto.Name;
+                }
+                else
+                {
+                    cachedGroups.Add(resultDto);
+                }
+
+                _cacheService.Set(GroupsCacheKey, cachedGroups);
 
                 return Result<GroupDto>.SuccessResult(resultDto, "Grup başarıyla güncellendi.");
             }
@@ -133,7 +146,16 @@ namespace AktiviteTakip.Server.Services
                 await _unitOfWork.Groups.SoftDeleteAsync(group);
                 await _unitOfWork.CommitAsync();
 
-                _cacheService.Remove(GroupsCacheKey);
+                var cachedGroups = _cacheService.Get<List<GroupDto>>(GroupsCacheKey);
+                if (cachedGroups != null)
+                {
+                    var toRemove = cachedGroups.FirstOrDefault(g => g.Id == id);
+                    if (toRemove != null)
+                    {
+                        cachedGroups.Remove(toRemove);
+                        _cacheService.Set(GroupsCacheKey, cachedGroups);
+                    }
+                }
 
                 return Result<bool>.SuccessResult(true, "Grup başarıyla silindi.");
             }

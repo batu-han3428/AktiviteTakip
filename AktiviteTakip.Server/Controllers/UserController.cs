@@ -77,40 +77,6 @@ namespace AktiviteTakip.Server.Controllers
         }
 
 
-        ///// <summary>
-        ///// Kullanıcı reset tokenı doğrular
-        ///// </summary>
-        ///// <param name="userId">Kullanıcı id</param>
-        ///// <param name="token">Token</param>
-        ///// <returns></returns>
-        //[HttpGet("verify-reset-token")]
-        //public async Task<IActionResult> VerifyResetToken([FromQuery] string userId, [FromQuery] string token)
-        //{
-        //    var isValid = await _userService.VerifyResetTokenAsync(userId, token);
-        //    if (!isValid)
-        //        return BadRequest(new { message = "Token geçersiz veya süresi dolmuş." });
-
-        //    return Ok(new { message = "Token geçerli." });
-        //}
-
-
-        ///// <summary>
-        ///// Kullanının şifre oluşturmasını sağlar
-        ///// </summary>
-        ///// <param name="model">Şifre bilgileri</param>
-        ///// <returns></returns>
-        //[HttpPost("reset-password")]
-        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
-        //{
-        //    var result = await _userService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);
-
-        //    if (!result.Success)
-        //        return BadRequest(new { message = result.Message });
-
-        //    return Ok(new { message = result.Message });
-        //}
-
-
         /// <summary>
         /// Kullanıcının bilgilerini günceller
         /// </summary>

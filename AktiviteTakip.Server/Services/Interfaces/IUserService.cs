@@ -8,8 +8,6 @@ namespace AktiviteTakip.Server.Services.Interfaces
         Task<Result<IEnumerable<UserDto>>> GetUsersWithRolesAsync(bool onlyActive = false);
         Task<Result<bool>> UpdateUserActiveStatusAsync(Guid userId);
         Task<Result<UserDto>> CreateUserAsync(CreateUserDto dto);
-        //Task<bool> VerifyResetTokenAsync(string userId, string token);
-        //Task<Result<bool>> ResetPasswordAsync(string userId, string token, string newPassword);
         Task<Result<UserDto>> UpdateUserAsync(UpdateUserDto dto);
         Task<Result<bool>> DeleteUserAsync(Guid userId);
     }
