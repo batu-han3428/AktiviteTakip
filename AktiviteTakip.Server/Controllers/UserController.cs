@@ -1,10 +1,9 @@
 ﻿using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Enums;
-using AktiviteTakip.Server.Models;
 using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AktiviteTakip.Server.Controllers
 {
@@ -28,7 +27,8 @@ namespace AktiviteTakip.Server.Controllers
         [Authorize(Roles = nameof(Roles.Admin))]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] bool onlyActive)
         {
-            var result = await _userService.GetUsersWithRolesAsync(onlyActive);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _userService.GetUsersWithRolesAsync(onlyActive, currentUserId);
             if (result.Success)
                 return Ok(result.Data);
             else

@@ -29,7 +29,7 @@ public class UserService : IUserService
         _userContextService = userContextService;
     }
 
-    public async Task<Result<IEnumerable<UserDto>>> GetUsersWithRolesAsync(bool onlyActive = false)
+    public async Task<Result<IEnumerable<UserDto>>> GetUsersWithRolesAsync(bool onlyActive = false, string? excludeUserId = null)
     {
         try
         {
@@ -83,6 +83,11 @@ public class UserService : IUserService
                 cachedUsers = cachedUsers.Where(u => u.IsActive).ToList();
             }
 
+            if (!string.IsNullOrEmpty(excludeUserId) && Guid.TryParse(excludeUserId, out var excludeGuid))
+            {
+                cachedUsers = cachedUsers.Where(u => u.Id != excludeGuid).ToList();
+            }
+
             return Result<IEnumerable<UserDto>>.SuccessResult(cachedUsers);
         }
         catch (Exception ex)
@@ -90,7 +95,6 @@ public class UserService : IUserService
             return Result<IEnumerable<UserDto>>.Failure($"Kullanıcılar alınırken hata oluştu: {ex.Message}");
         }
     }
-
 
     public async Task<Result<bool>> UpdateUserActiveStatusAsync(Guid userId)
     {

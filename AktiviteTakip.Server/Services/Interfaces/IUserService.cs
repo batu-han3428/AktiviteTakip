@@ -5,7 +5,7 @@ namespace AktiviteTakip.Server.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<Result<IEnumerable<UserDto>>> GetUsersWithRolesAsync(bool onlyActive = false);
+        Task<Result<IEnumerable<UserDto>>> GetUsersWithRolesAsync(bool onlyActive = false, string? excludeUserId = null);
         Task<Result<bool>> UpdateUserActiveStatusAsync(Guid userId);
         Task<Result<UserDto>> CreateUserAsync(CreateUserDto dto);
         Task<Result<UserDto>> UpdateUserAsync(UpdateUserDto dto);

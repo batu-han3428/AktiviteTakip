@@ -1,6 +1,4 @@
-﻿using AktiviteTakip.Server.Email;
-using AktiviteTakip.Server.Email.Interfaces;
-using AktiviteTakip.Server.Repositories;
+﻿using AktiviteTakip.Server.Repositories;
 using AktiviteTakip.Server.Repositories.Interfaces;
 using AktiviteTakip.Server.Services;
 using AktiviteTakip.Server.Services.Interfaces;
@@ -21,7 +19,6 @@ namespace AktiviteTakip.Server.Configurations
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<IEmailSender, SmtpEmailSender>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
