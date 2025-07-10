@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 import CalendarPage from '../features/events/CalendarPage';
 import LoginPage from '../features/auth/LoginPage';
-import RegisterPage from '../features/auth/RegisterPage';
 import ProtectedRoute from '../features/auth/ProtectedRoute';
 
 import AdminPanelLayout from '../features/admin/components/AdminPanelLayout';
@@ -10,6 +9,8 @@ import UsersPage from '../features/admin/pages/users/UsersPage';
 import GroupsPage from '../features/admin/pages/groups/GroupsPage';
 import Layout from '../features/common/components/Layout';
 import LogoutPage from '../features/auth/LogoutPage';
+import ResetPasswordPage from '../features/auth/ResetPasswordPage';
+import ForgotPassword from '../features/auth/ForgotPassword';
 
 const RouterComponent = () => {
     return (
@@ -18,8 +19,10 @@ const RouterComponent = () => {
                 {/* Public routes */}
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
                 <Route path="/logout" element={<LogoutPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
 
                 {/* Protected Calendar */}
                 {/*<Route*/}

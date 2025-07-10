@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Link, Box, Grid, Typography, Alert, CircularProgress } from '@mui/material';
+import { TextField, Button, Link, Box, Grid, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';  // ikonlar
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from './authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -8,13 +9,13 @@ const LoginForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { loading, error, isLoggedIn, role } = useSelector(state => state.auth);
+    const { loading, error, isLoggedIn } = useSelector(state => state.auth);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // şifre görünürlük durumu
 
     useEffect(() => {
-        console.log(role)
         if (isLoggedIn) {
             navigate('/calendar');
         }
@@ -22,7 +23,14 @@ const LoginForm = () => {
 
     const handleLogin = async () => {
         dispatch(loginUser({ email, password }));
-        // navigate burada değil, isLoggedIn değişince useEffect tetiklenir
+    };
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault(); 
     };
 
     return (
@@ -42,12 +50,26 @@ const LoginForm = () => {
 
             <TextField
                 label="Şifre"
-                type="password"
+                type={showPassword ? 'text' : 'password'} 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 fullWidth
                 required
                 margin="normal"
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                                onClick={handleClickShowPassword}
+                                onMouseDown={handleMouseDownPassword}
+                                edge="end"
+                            >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    )
+                }}
             />
 
             <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, mb: 2 }} disabled={loading}>
@@ -57,9 +79,6 @@ const LoginForm = () => {
             <Grid container justifyContent="space-between">
                 <Grid>
                     <Link href="/forgot-password" variant="body2">Şifremi Unuttum</Link>
-                </Grid>
-                <Grid>
-                    <Link href="/register" variant="body2">Üye Ol</Link>
                 </Grid>
             </Grid>
         </Box>

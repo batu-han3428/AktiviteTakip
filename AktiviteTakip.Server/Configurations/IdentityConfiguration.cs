@@ -11,9 +11,14 @@ namespace AktiviteTakip.Server.Configurations
     {
         public static void AddIdentityConfiguration(this IServiceCollection services, IConfiguration config)
         {
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ğüşöçıİĞÜŞÖÇ";
+
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             services.AddAuthentication(options =>
             {

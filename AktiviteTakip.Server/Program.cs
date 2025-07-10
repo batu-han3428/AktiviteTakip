@@ -1,6 +1,7 @@
 using AktiviteTakip.Server.Configurations;
 using AktiviteTakip.Server.Data;
 using AktiviteTakip.Server.Data.Seeders;
+using AktiviteTakip.Server.Models;
 using AktiviteTakip.Server.Services;
 using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,9 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddApplicationServices();
 builder.Services.AddIdentityConfiguration(builder.Configuration);

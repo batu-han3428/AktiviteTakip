@@ -1,7 +1,9 @@
 ﻿using AktiviteTakip.Server.DTOs;
 using AktiviteTakip.Server.Enums;
+using AktiviteTakip.Server.Models;
 using AktiviteTakip.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AktiviteTakip.Server.Controllers
@@ -24,9 +26,9 @@ namespace AktiviteTakip.Server.Controllers
         /// <returns></returns>
         [HttpGet("getusers")]
         [Authorize(Roles = nameof(Roles.Admin))]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromQuery] bool onlyActive)
         {
-            var result = await _userService.GetUsersWithRolesAsync();
+            var result = await _userService.GetUsersWithRolesAsync(onlyActive);
             if (result.Success)
                 return Ok(result.Data);
             else
@@ -51,6 +53,100 @@ namespace AktiviteTakip.Server.Controllers
                 return BadRequest(result.Message);
 
             return Ok(new { message = result.Message, success = true });
+        }
+
+
+        /// <summary>
+        /// Kullanıcı oluşturur
+        /// </summary>
+        /// <param name="dto">Kullanıcı bilgileri</param>
+        /// <returns></returns>
+        [HttpPost("createuser")]
+        [Authorize(Roles = nameof(Roles.Admin))]
+        public async Task<IActionResult> CreateUser(CreateUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _userService.CreateUserAsync(dto);
+
+            if (result.Success)
+                return Ok(result.Data);
+            else
+                return BadRequest(new { message = result.Message, success = false });
+        }
+
+
+        ///// <summary>
+        ///// Kullanıcı reset tokenı doğrular
+        ///// </summary>
+        ///// <param name="userId">Kullanıcı id</param>
+        ///// <param name="token">Token</param>
+        ///// <returns></returns>
+        //[HttpGet("verify-reset-token")]
+        //public async Task<IActionResult> VerifyResetToken([FromQuery] string userId, [FromQuery] string token)
+        //{
+        //    var isValid = await _userService.VerifyResetTokenAsync(userId, token);
+        //    if (!isValid)
+        //        return BadRequest(new { message = "Token geçersiz veya süresi dolmuş." });
+
+        //    return Ok(new { message = "Token geçerli." });
+        //}
+
+
+        ///// <summary>
+        ///// Kullanının şifre oluşturmasını sağlar
+        ///// </summary>
+        ///// <param name="model">Şifre bilgileri</param>
+        ///// <returns></returns>
+        //[HttpPost("reset-password")]
+        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+        //{
+        //    var result = await _userService.ResetPasswordAsync(model.UserId, model.Token, model.NewPassword);
+
+        //    if (!result.Success)
+        //        return BadRequest(new { message = result.Message });
+
+        //    return Ok(new { message = result.Message });
+        //}
+
+
+        /// <summary>
+        /// Kullanıcının bilgilerini günceller
+        /// </summary>
+        /// <param name="id">Kullanıcı id</param>
+        /// <param name="dto">Kullanıcı bilgileri</param>
+        /// <returns></returns>
+        [HttpPut("updateuser")]
+        [Authorize(Roles = nameof(Roles.Admin))]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto dto)
+        {
+            if (id != dto.Id)
+                return BadRequest("Id uyuşmuyor.");
+
+            var result = await _userService.UpdateUserAsync(dto);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Kullanıcı siler
+        /// </summary>
+        /// <param name="userId">Kullanıcı id</param>
+        /// <returns></returns>
+        [HttpDelete("deleteuser")]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            var result = await _userService.DeleteUserAsync(userId);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
         }
     }
 }

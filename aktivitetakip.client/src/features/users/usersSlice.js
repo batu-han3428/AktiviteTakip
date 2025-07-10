@@ -3,10 +3,11 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Kullanýcýlarý getir
-export const fetchUsers = createAsyncThunk('users/fetchUsers', async (_, thunkAPI) => {
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async (onlyActive = false, thunkAPI) => {
     const state = thunkAPI.getState();
     const token = state.auth.token;
-    const response = await fetch(`${API_BASE_URL}/api/user/getusers`, {
+    console.log(onlyActive)
+    const response = await fetch(`${API_BASE_URL}/api/user/getusers?onlyActive=${onlyActive}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -60,8 +61,8 @@ export const updateUserActiveStatus = createAsyncThunk(
 export const createUser = createAsyncThunk('users/createUser', async (userData, thunkAPI) => {
     const state = thunkAPI.getState();
     const token = state.auth.token;
-
-    const response = await fetch(`${API_BASE_URL}/api/user/create`, {
+    console.log(userData)
+    const response = await fetch(`${API_BASE_URL}/api/user/createuser`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -89,8 +90,8 @@ export const updateUser = createAsyncThunk('users/updateUser', async (userData, 
     const state = thunkAPI.getState();
     const token = state.auth.token;
 
-    const response = await fetch(`${API_BASE_URL}/api/user/update`, {
-        method: 'PUT',
+    const response = await fetch(`${API_BASE_URL}/api/user/updateuser?id=${userData.id}`, { 
+           method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -112,6 +113,31 @@ export const updateUser = createAsyncThunk('users/updateUser', async (userData, 
     return await response.json();
 });
 
+export const deleteUser = createAsyncThunk('users/deleteUser', async (id, thunkAPI) => {
+    const state = thunkAPI.getState();
+    const token = state.auth.token;
+
+    const response = await fetch(`${API_BASE_URL}/api/user/deleteuser?userId=${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Kullanýcý silinemedi';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch {
+            throw new Error(errorMessage);
+        }
+        throw new Error(errorMessage);
+    }
+
+    return { id };
+});
 
 const usersSlice = createSlice({
     name: 'users',
@@ -123,8 +149,13 @@ const usersSlice = createSlice({
         updateError: null,
         createLoading: false,
         createError: null,
+        onlyActive: true,
     },
-    reducers: {},
+    reducers: {
+        setOnlyActive(state, action) {
+            state.onlyActive = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             // fetchUsers
@@ -180,6 +211,14 @@ const usersSlice = createSlice({
                 if (index !== -1) {
                     state.list[index] = updatedUser;
                 }
+            })
+
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                const deletedId = action.payload.id;
+                state.list = state.list.filter(user => user.id !== deletedId);
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
+                state.error = action.error.message ?? 'Kullanýcý silinemedi';
             });
     },
 });

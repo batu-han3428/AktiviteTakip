@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+ï»¿import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -42,7 +42,7 @@ const AdminPanelLayout = () => {
 
     const menuItems = [
         {
-            title: 'Tanýmlar',
+            title: 'TanÄ±mlar',
             icon: <Category />,
             children: [
                 { title: 'Kullanici Tanimlari', to: '/admin/users' },
@@ -67,12 +67,12 @@ const AdminPanelLayout = () => {
                     height: 64,
                 }}
             >
-                {/* Menü daraltma toggle butonu - sadece masaüstünde görünür */}
+                {/* Men  daraltma toggle butonu - sadece masa st nde g r n r */}
                 <IconButton
                     size="small"
                     onClick={() => setDrawerOpen(!drawerOpen)}
                     sx={{ color: '#fff', display: { xs: 'none', sm: 'inline-flex' } }}
-                    aria-label={drawerOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+                    aria-label={drawerOpen ? 'Men y  kapat' : 'Men y  a '}
                 >
                     <MenuIcon />
                 </IconButton>
@@ -113,7 +113,7 @@ const AdminPanelLayout = () => {
                                         component={Link}
                                         to={child.to}
                                         selected={location.pathname === child.to}
-                                        onClick={() => setMobileOpen(false)} // mobilde týklayýnca menüyü kapat
+                                        onClick={() => setMobileOpen(false)} // mobilde t klay nca men y  kapat
                                     >
                                         <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : 'auto', justifyContent: 'center' }}>
                                             <Category />
@@ -144,7 +144,7 @@ const AdminPanelLayout = () => {
                     open={mobileOpen}
                     onClose={handleDrawerToggle}
                     ModalProps={{
-                        keepMounted: true, // performans için
+                        keepMounted: true, // performans i in
                     }}
                     sx={{
                         display: { xs: 'block', sm: 'none' },
@@ -154,7 +154,7 @@ const AdminPanelLayout = () => {
                     {drawer}
                 </Drawer>
 
-                {/* Masaüstü drawer */}
+                {/* Masa st  drawer */}
                 <Drawer
                     variant="permanent"
                     sx={{
@@ -186,7 +186,7 @@ const AdminPanelLayout = () => {
                         position: 'relative',
                     }}
                 >
-                    {/* Mobil hamburger menü */}
+                    {/* Mobil hamburger men  */}
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
@@ -201,7 +201,7 @@ const AdminPanelLayout = () => {
                         Admin Paneli
                     </Typography>
 
-                    {/* Home ikonu menü daraltma yerine burada */}
+                    {/* Home ikonu men  daraltma yerine burada */}
                     <IconButton
                         size="small"
                         onClick={() => navigate('/calendar')}
